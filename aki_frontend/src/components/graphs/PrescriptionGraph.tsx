@@ -1,110 +1,112 @@
 import {
-    Line,
-    LineChart,
-    Tooltip,
-    XAxis,
-    YAxis,
-    ResponsiveContainer
+  Tooltip,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  ScatterChart,
+  CartesianGrid,
+  Scatter,
+  Rectangle,
+  TooltipProps,
+  DefaultTooltipContent,
 } from "recharts";
-import { COLORS, getDayAxisKey, getDayTicks } from "@/components/utils/graphUtils"
-import { StarDot } from "@/components/graphs/atomic/LRPStarDot"
+import {
+  COLORS,
+  getDayAxisKey,
+  getTicksDomain,
+} from "@/components/utils/graphUtils";
 import { ITimeSeriesData } from "@/types/patientDetails";
-import styled from "styled-components";
-import { DateTooltip } from "../utils/GraphTooltip";
+import React from "react";
 
-const GraphRow = styled.div`
-    display: flex;
-`
+const DateTooltip: React.FC<TooltipProps<any, any>> = (props) => {
+  const { payload } = props;
 
+  const updatedPayload =
+    !!payload && payload.length > 0 ? [{ name: "Date", value: payload[0].payload.date }] : payload;
 
-const PrescriptionGraph: React.FC<{ data: ITimeSeriesData['prescription_data'] }> = ({ data }) => {
-    const height = 360;
+  const updatedProps = {
+    ...props,
+    payload: updatedPayload,
+  };
 
-    const allDataKeys = data.daily.length > 0 ? Object.keys(data.daily[0]) : []
-    const dataColumns: string[] = []
-    const lrpColumns: string[] = []
+  return <DefaultTooltipContent {...updatedProps} />;
+};
 
-    for (const k of allDataKeys) {
-        if (k in {'day': true, 'slot': true, 'date': true})
-            continue;
-        if (k.substring(k.length - 3) === 'lrp')
-            lrpColumns.push(k)
-        else
-            dataColumns.push(k)
-    }
+const formatScatterData = (columns: Array<string>, data: ITimeSeriesData["prescription_data"]) =>
+  Object.fromEntries(
+    columns.map((column) => [
+      column,
+      data
+        .filter((datum) => !!datum[column])
+        .map((datum) => ({ x: getDayAxisKey(datum), y: column })),
+    ])
+  );
 
-    return (
-        <GraphRow>
-            <ResponsiveContainer width="100%" height={height}>
-                <LineChart data={data.pre6m.map(datum => ({
-                    ...datum,
-                    tick: "입원 전 6개월 이내"
-                }))}>
-                    <YAxis yAxisId="value" type="category" fontSize={10} />
-                    <XAxis dataKey="tick" fontSize={14}></XAxis>
-                    {dataColumns.map((col, id) =>
-                        <Line
-                            yAxisId="value"
-                            name={col}
-                            dataKey={col}
-                            type="linear"
-                            stroke={COLORS[id]}
-                            strokeWidth={3}
-                            key={col}
-                            fill={COLORS[id]}
-                        />
-                    )}
-                    {lrpColumns.map((col, id) =>
-                        <Line
-                            yAxisId="value"
-                            dataKey={col}
-                            dot={<StarDot />}
-                            key={col}
-                            stroke={COLORS[id]}
-                            strokeWidth={3}
-                            legendType="none"
-                        />
-                    )}
-                    <Tooltip contentStyle={{ fontSize: 14 }} />
-                </LineChart>
-            </ResponsiveContainer>
-            <ResponsiveContainer width="100%" height={height}>
-                <LineChart data={data.daily.map((item) => ({
-                    ...item,
-                    tick: getDayAxisKey(item)
-                }))}>
-                    <YAxis yAxisId="value" ticks={dataColumns} type="category" fontSize={10} />
-                    <XAxis dataKey="tick" fontSize={14}>
-                    </XAxis>
-                    {dataColumns.map((col, id) =>
-                        <Line
-                            yAxisId="value"
-                            name={col}
-                            dataKey={col}
-                            type="linear"
-                            dot={true}
-                            stroke={COLORS[id]}
-                            strokeWidth={3}
-                            key={col}
-                            fill={COLORS[id]}
-                        />
-                    )}
-                    {lrpColumns.map((col, id) =>
-                        <Line
-                            yAxisId="value"
-                            dataKey={col}
-                            dot={<StarDot />}
-                            key={col}
-                            stroke={COLORS[id]}
-                            strokeWidth={3}
-                            legendType="none"
-                        />
-                    )}
-                    <Tooltip contentStyle={{ fontSize: 14 }} content={<DateTooltip />} />
-                </LineChart>
-            </ResponsiveContainer>
-        </GraphRow>
-    );
+const makeMapper = (data: (string | number)[]) =>
+  Object.fromEntries(data.map((datum, i) => [datum, i]));
+
+const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }> = ({ data }) => {
+  const height = 360;
+
+  const allDataKeys = data.length > 0 ? Object.keys(data[0]) : [];
+  const dataColumns: string[] = [];
+  const lrpColumns: string[] = [];
+
+  for (const k of allDataKeys) {
+    if (k in { day: true, slot: true, date: true }) continue;
+    if (k.substring(k.length - 3) === "lrp") lrpColumns.push(k);
+    else dataColumns.push(k);
+  }
+
+  const maxDay = Math.max(...data.map((datum) => datum.day));
+  const scatterData = formatScatterData(dataColumns, data);
+
+  const xTicks = getTicksDomain(maxDay);
+  const xTicksMapper = makeMapper(xTicks);
+
+  const dataColumnsMapper = makeMapper(dataColumns);
+
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <ScatterChart>
+        <CartesianGrid />
+        <YAxis
+          fontSize={10}
+          type="number"
+          dataKey="y"
+          ticks={Object.values(dataColumnsMapper)}
+          tickFormatter={(val, _) => dataColumns[val]}
+        />
+        <XAxis
+          fontSize={14}
+          type="number"
+          dataKey="x"
+          ticks={Object.values(xTicksMapper)}
+          tickFormatter={(val) => xTicks[val]}
+        />
+        {dataColumns
+          .filter((col) => scatterData[col].length > 0)
+          .map((col, id) => (
+            <Scatter
+              name={col}
+              data={scatterData[col].map(({ x, y }) => ({
+                date: x,
+                x: xTicksMapper[x],
+                y: dataColumnsMapper[y],
+              }))}
+              stroke={COLORS[id]}
+              strokeWidth={3}
+              key={col}
+              fill={COLORS[id]}
+              shape={
+                <Rectangle width={40} height={10} fill={COLORS[id]} strokeWidth={COLORS[id]} />
+              }
+            />
+          ))}
+        <Tooltip contentStyle={{ fontSize: 14 }} content={<DateTooltip />} />
+      </ScatterChart>
+    </ResponsiveContainer>
+  );
 };
 
 export default PrescriptionGraph;

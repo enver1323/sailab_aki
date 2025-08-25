@@ -119,10 +119,10 @@ export type SurgicalDataEntry = {
 } & { [key: string]: string | null };
 
 export interface ITimeSeriesData {
-  prediction:{
+  prediction: {
     value: number;
     threshold: number;
-  }
+  };
   general_data: PatientMetaData;
   binary_data: Array<PatientBinaryDataEntry>;
   test_data: {
@@ -132,10 +132,7 @@ export interface ITimeSeriesData {
   };
   vital_data: { [key: string]: Array<VitalDataEntry> };
   prob_data: Array<TimeSeriesEntry>;
-  prescription_data: {
-    pre6m: Array<PrescriptionDataEntry>;
-    daily: Array<PrescriptionDataEntry>;
-  };
+  prescription_data: Array<PrescriptionDataEntry>;
   surgical_data: Array<SurgicalDataEntry>;
 }
 
