@@ -1,0 +1,25 @@
+{
+  "success": "Success",
+  "auth.failed": "Invalid credentials",
+  
+  "user.exists": "User with username \"{username}\" already exists",
+  "user.created": "User with username \"{username}\" was successfully registered",
+  "user.updated": "User with username \"{username}\" was successfully updated",
+  "user.deleted": "User was successfully deleted",
+  "user.logout": "User logged out",
+
+  "department.exists": "Department with external_id \"{external_id}\" already exists",
+  "department.created": "Department with name \"{name}\" was successfully created",
+  "department.updated": "Department with name \"{name}\" was successfully updated",
+
+  "errors.less_than": "Value ({value}) cannot be less than {comparator}",
+  "errors.file": "Value should be a valid file",
+  "errors.content_type": "Provided file should be one of defined content types: {content_types}",
+  "errors.internal": "Internal Server Error",
+  "errors.no_records": "No records were found",
+  "errors.unique_value": "Provided {field} already exists",
+  "errors.token_expired": "The token was expired",
+  "errors.validation": "Validation Error",
+  "errors.token_revoked": "The token was revoked",
+  "errors.insufficient_rights": "You do not have sufficient rights for this action"
+}

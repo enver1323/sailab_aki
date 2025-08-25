@@ -1,0 +1,442 @@
+patient_info = [
+    'p_id',
+    'date_admin',
+    'stay_length',
+    'department',  # encoding 필요
+    'age',
+    'sex',
+    'bmi',
+    'b_cr',
+    'b_egfr',  ##필수 -> 없으면 환자 제외
+    'cc_foroperation',
+    'erstay_days',
+    'icu',
+    'weight',
+    'smoking',
+    'drinking',
+    'adm_bcr_day_diff',
+    'ami',
+    'chf',
+    'pvd',
+    'cvd',
+    'dementia',
+    'pulmonary_disease',
+    'ctd',
+    'peptic_ulcer',
+    'liver_disease',
+    'severe_liver_disease',
+    'diabetes',
+    'diabetic_complication',
+    'paraplegia',
+    'renal_disease',
+    'cancer',
+    'metastatic_cancer',
+    'htn',
+    'aki',
+    'cci',
+    'head_and_neck_cancer',
+    'gi_cancer',
+    'respiratory_cancer',
+    'bone_cancer',
+    'skin_cancer',
+    'soft_tissue_cancer',
+    'breast_cancer',
+    'female_genital_cancer',
+    'male_genital_cancer',
+    'urinary_cancer',
+    'cns_cancer',
+    'endocrine_cancer',
+    'secondary_cancer',
+    'blood_cancer',
+]
+
+cancer_name = [
+    'head_and_neck_cancer',
+    'gi_cancer',
+    'respiratory_cancer',
+    'bone_cancer',
+    'skin_cancer',
+    'soft_tissue_cancer',
+    'breast_cancer',
+    'female_genital_cancer',
+    'male_genital_cancer',
+    'urinary_cancer',
+    'cns_cancer',
+    'endocrine_cancer',
+    'secondary_cancer',
+    'blood_cancer',
+]
+
+drop = [
+    'date_discharge',
+    'date_admin',
+    'admin_place',
+    'doc1',
+    'department_org'
+]
+
+static_e = [
+    'age',
+    'sex',
+    'bmi',
+    'b_cr',
+    'b_egfr',
+]
+
+ex = [
+    'ex_nobase',
+    'ex_bcr4',
+    'ex_begfr15',
+    'ex_nocr',
+    'ex_pre_dialysis',
+    # 'ex_age',
+]
+
+dynamic0 = [
+    'ck',
+    'lipase',
+    'troponin',
+    'urine_creatinine',
+    'urine_protein',
+    'urine_protein_cr_ratio',
+    'urine_protein_dipstick',
+    # 'microalbumin',
+    # 'microalbumin_cr_ratio',
+]
+
+# avg, max, min
+vital_signs = [
+    "sbp",
+    "dbp",
+    "bt",
+    "pr",
+]
+
+# lowhigh, avg, max, min
+dynamic = [
+    'albumin',
+    'bilirubin',
+    'bun',
+    'calcium',
+    'chloride',
+    'co2',
+    'creatinine',
+    'crp',
+    'hb',
+    'hematocrit',
+    'phosphorus',
+    'plt',
+    'potassium',
+    'sodium',
+    'wbc',
+    'aki',
+    'aki_critical'
+]
+
+dynamicvalues = {
+    'albumin': (4.25),
+    'bilirubin': (0.7),
+    'bun': (18),
+    'calcium': (9.65),
+    'chloride': (104),
+    'co2': (27.5),
+    'crp': (0.25),
+    'hb': (15),
+    'hematocrit': (45.5),
+    'phosphorus': (3.5),
+    'plt': (265),
+    'potassium': (4.5),
+    'sodium': (140),
+    'wbc': (7),
+}
+
+pre6m = [
+    'pre6m_acei',
+    'pre6m_acyclovir',
+    'pre6m_aminoglycoside',
+    'pre6m_amphotericin',
+    'pre6m_arb',
+    'pre6m_betablocker',
+    'pre6m_ccb',
+    'pre6m_cisplatin',
+    'pre6m_colistin',
+    'pre6m_cyclosporin',
+    'pre6m_diuretics',
+    'pre6m_nsaid',
+    'pre6m_statin',
+    'pre6m_tacrolimus',
+    'pre6m_vancomycin',
+    'pre6m_vasopressor',
+    'pre6m_tnx'
+]
+
+static = [
+    'icu',
+    'acei',
+    'acyclovir',
+    'aminoglycoside',
+    'amphotericin',
+    'arb',
+    'betablocker',
+    'ccb',
+    'cisplatin',
+    'colistin',
+    'cyclosporin',
+    'diuretics',
+    'nsaid',
+    'statin',
+    'tacrolimus',
+    'vancomycin',
+    'vasopressor',
+    'tnx',
+    'antibiotic_j01a',
+    'antibiotic_j01c',
+    'antibiotic_j01d',
+    'antibiotic_j01e',
+    'antibiotic_j01f',
+    'antibiotic_j01m',
+    'antibiotic_j01x',
+    'med_albumin',
+    'rbc',
+    'anes_general',
+    'anes_non_general',
+    'asa_class',
+    'surgery_time',
+    'contrast',
+    'op_risk_score',
+    'dialysis'
+]
+
+target1 = ['d1_1_aki', 'd1_2_aki', 'd1_3_aki', 'd2_1_aki', 'd2_2_aki', 'd2_3_aki']
+
+minmaxvalues = {
+    'age': (104.0, 0.0),
+    'bmi': (68.44, 0.0),
+    'b_cr': (3.99, 0.0),
+    'b_egfr': (300.0, 0.0),
+    'albumin': (20.0, 0.0),
+    'bilirubin': (10.0, 0.0),
+    'bun': (200.0, 0.0),
+    'calcium': (18.0, 0.0),
+    'chloride': (152.5, 0.0),
+    'creatinine': (30, 0.0),
+    # 'ck': (100.0, 0.0),
+    'co2': (62.0, 0.0),
+    # 'crp': (40.0, 0.0),
+    # 'glucose': (600.0, 0.0),
+    # 'got': (100.0, 0.0),
+    # 'gpt': (80.0, 0.0),
+    'hb': (40.0, 0.0),
+    # 'lipase': (50.0, 0.0),
+    # 'plt': (400.0, 0.0),
+    'potassium': (20.0, 0.0),
+    'phosphorus': (20.0, 0.0),
+    'sodium': (200.0, 0.0),
+    # 'troponin': (1.0, 0.0),
+    # 'wbc': (35.0, 0.0),
+    'sbp_max': (250.0, 0.0),
+    'dbp_max': (231.0, 0.0),
+    'pr_max': (386.0, 0.0),
+    'bt_max': (45.0, 0.0),
+    'sbp_avg': (241.0, 0.0),
+    'dbp_avg': (180.0, 0.0),
+    'pr_avg': (365.0, 0.0),
+    'bt_avg': (44.0, 0.0),
+    'sbp_min': (241.0, 0.0),
+    'dbp_min': (180.0, 0.0),
+    'pr_min': (365.0, 0.0),
+    'bt_min': (44.0, 0.0)
+}
+
+lowhighvalues = {
+    'albumin': (1, 3.3, 5.2),
+    'bilirubin': (2, 0.2, 1.2),
+    'bun': (2, 10.0, 26.0),
+    'calcium': (3, 8.8, 10.5),
+    'chloride': (3, 98.0, 110.0),
+    'creatinine': (2, 0.7, 1.4),
+    'ck': (2, 20.0, 270.0),
+    'co2': (3, 24.0, 31.0),
+    'crp': (2, 0.0, 0.5),
+    'hb': (1, 12.0, 16.0),
+    'hematocrit': (3, 36, 52),
+    'lipase': (2, 23.0, 300.0),
+    # 'microalbumin': (4, 0, 0),
+    # 'microalbumin_cr_ratio': (2, 0, 30),
+    'phosphorus': (3, 3.5, 4.5),
+    'plt': (3, 130.0, 400.0),
+    'potassium': (3, 3.5, 5.5),
+    'sodium': (3, 135.0, 145.0),
+    'troponin': (2, 0.0, 0.045),
+    'urine_creatinine': (4, 0, 0),
+    'urine_protein': (4, 0, 0),
+    'urine_protein_cr_ratio': (2, 0, 150),
+    'urine_protein_dipstick': (2, 0.0, 0.5),
+    'wbc': (3, 4.0, 10.0),
+    'sbp_max': (3, 90.0, 180.0),
+    'dbp_max': (3, 60.0, 110.0),
+    'pr_max': (3, 60.0, 110.0),
+    'bt_max': (3, 36.5, 38.3),
+    'sbp_avg': (3, 90.0, 160.0),
+    'dbp_avg': (3, 60.0, 100.0),
+    'pr_avg': (3, 60.0, 100.0),
+    'bt_avg': (3, 36, 38.0),
+    'sbp_min': (3, 90.0, 140.0),
+    'dbp_min': (3, 60.0, 90.0),
+    'pr_min': (3, 60.0, 90.0),
+    'bt_min': (3, 35, 37.6)
+}
+
+final_target = ['24h_1', '24h_2', '48h']
+
+target = [
+    'd1_1_aki',
+    'd1_2_aki',
+    'd1_3_aki',
+
+    'd2_1_aki',
+    'd2_2_aki',
+    'd2_3_aki',
+
+    'd3_1_aki',
+    'd3_2_aki',
+    'd3_3_aki',
+
+    'd4_1_aki',
+    'd4_2_aki',
+    'd4_3_aki',
+
+    'd5_1_aki',
+    'd5_2_aki',
+    'd5_3_aki',
+
+    'd6_1_aki',
+    'd6_2_aki',
+    'd6_3_aki',
+
+    'd7_1_aki',
+    'd7_2_aki',
+    'd7_3_aki',
+
+    'd8_1_aki',
+    'd8_2_aki',
+    'd8_3_aki',
+]
+
+# XAI columns
+drug_name = [
+    'acei', 'acyclovir', 'aminoglycoside', 'amphotericin', 'arb', 'betablocker', 'ccb', 'cisplatin', 'colistin',
+    'cyclosporin', 'diuretics', 'nsaid', 'statin', 'tacrolimus', 'tnx', 'vancomycin', 'vasopressor', 'anes_general',
+    'anes_non_general', 'asa_class', 'contrast', 'dialysis', 'surgery_time', 'op_risk_score', 'icu'
+]
+"""
+ 'nephro_toxic', 'renal_relevant', 'bp_up', 'bp_down',
+ 'pr_relevant', 'hemodynamic', 'inflammation',
+ 'hypoperfusion', 'thr_micro', 'tub_necrosis',
+ 'tubular', 'inter_neph', 'antibiotic_j01a', 'antibiotic_j01c', 
+ 'antibiotic_j01d', 'antibiotic_j01e','antibiotic_j01f', 'antibiotic_j01m', 'antibiotic_j01x', 
+ 'med_albumin','rbc', ]
+ """
+dy_others = ['aki', 'aki_critical'] + ['margin', 'pre_aki_margin']
+others = [
+    'department', 'adm_bcr_day_diff', 'age', 'aki', 'ami', 'b_cr', 'b_egfr', 'bmi', 'cancer', 'cc_foroperation',
+    'cci', 'chf', 'ctd', 'cvd', 'dementia', 'diabetes', 'diabetic_complication', 'drinking', 'erstay_days', 'htn',
+    'icu', 'liver_disease', 'metastatic_cancer', 'paraplegia', 'peptic_ulcer', 'pulmonary_disease', 'pvd',
+    'renal_disease', 'severe_liver_disease', 'sex', 'smoking', 'weight', 'AKI_thres', 'pre_AKI_thres',
+    'age_extreme', 'b_cr_true', 'aki_init', 'surgery', 'blood', 'contrast', 'dialysis', 'cancer_high_risk',
+    'department_weight', 'b_egfr_categorize', 'bmi_categorize', 'Cr_kidigo'
+]  # 'adm_bcr_day_diff'
+ts_name = [
+    'ck', 'lipase', 'troponin', 'urine_creatinine', 'urine_protein', 'urine_protein_cr_ratio', 'urine_protein_dipstick',
+    'sbp', 'dbp', 'bt', 'pr', 'albumin', 'bilirubin', 'bun', 'calcium', 'chloride', 'co2', 'creatinine', 'crp', 'hb',
+    'hematocrit', 'phosphorus', 'plt', 'potassium', 'sodium', 'wbc'
+]
+
+# for visualization
+base_info = [
+    'department',
+    'age',
+    'sex',
+    'bmi',
+    'b_cr',
+    'b_egfr',
+    'weight',
+    'smoking',
+    'drinking',
+    'stay_length',
+    'cc_foroperation',
+]
+
+disease_info = [
+    'aki',
+    'ami',
+    'cancer',
+    'cci',
+    'chf',
+    'ctd',
+    'cvd',
+    'dementia',
+    'diabetes',
+    'diabetic_complication',
+    'hiv',
+    'htn',
+    'liver_disease',
+    'metastatic_cancer',
+    'paraplegia',
+    'peptic_ulcer',
+    'pulmonary_disease',
+    'pvd',
+    'renal_disease',
+    'severe_liver_disease',
+    'head_and_neck_cancer',
+    'gi_cancer',
+    'respiratory_cancer',
+    'bone_cancer',
+    'skin_cancer',
+    'soft_tissue_cancer',
+    'breast_cancer',
+    'female_genital_cancer',
+    'male_genital_cancer',
+    'urinary_cancer',
+    'cns_cancer',
+    'endocrine_cancer',
+    'secondary_cancer',
+    'blood_cancer',
+]
+
+treat_info = [
+    'icu',
+    'surgery_time',
+    'asa_class',
+    'anes_general',
+    'anes_non_general',
+    'contrast',
+    'dialysis',
+    'op_risk_score',
+    'acei',
+    'acyclovir',
+    'aminoglycoside',
+    'amphotericin',
+    'arb',
+    'betablocker',
+    'ccb',
+    'cisplatin',
+    'colistin',
+    'cyclosporin',
+    'diuretics',
+    'nsaid',
+    'statin',
+    'tacrolimus',
+    'tnx',
+    'vancomycin',
+    'vasopressor',
+    'antibiotic_j01a',
+    'antibiotic_j01c',
+    'antibiotic_j01d',
+    'antibiotic_j01e',
+    'antibiotic_j01f',
+    'antibiotic_j01m',
+    'antibiotic_j01x',
+    'med_albumin',
+    'rbc',
+]

@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+prettier --check '{**/*,*}.{js,ts,jsx,tsx}'
+yarn run build

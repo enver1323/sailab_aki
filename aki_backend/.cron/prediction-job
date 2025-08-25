@@ -1,0 +1,3 @@
+SHELL=/bin/bash
+
+* * * * * bash -l -c "/home/enver/projects/sailab_aki/aki_backend/.cron/prediction.sh >> /home/enver/projects/sailab_aki/aki_backend/.cron/log/cron.log 2>&1"

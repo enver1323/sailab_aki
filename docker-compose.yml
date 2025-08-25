@@ -1,0 +1,18 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: aki_db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=aki
+      - POSTGRES_PASSWORD=cderfv34
+      - POSTGRES_DB=aki
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
+    driver: local
