@@ -52,61 +52,15 @@ export type PatientMetaData = {
   date_discharge: Date | null;
 };
 
-export type SmallRangeEntry = {
+export type RangeEntry = {
   day: number;
   slot: number;
-  albumin_avg: number | null;
-  albumin_avg_lrp: number | null;
-  bilirubin_avg: number | null;
-  bilirubin_avg_lrp: number | null;
-  creatinine_avg: number | null;
-  creatinine_avg_lrp: number | null;
-  potassium_avg: number | null;
-  potassium_avg_lrp: number | null;
-};
-export type MidRangeEntry = {
-  day: number;
-  slot: number;
-  alt_avg: number | null;
-  alt_avg_lrp: number | null;
-  ast_avg: number | null;
-  ast_avg_lrp: number | null;
-  bun_avg: number | null;
-  bun_avg_lrp: number | null;
-  calcium_avg: number | null;
-  calcium_avg_lrp: number | null;
-  co2_avg: number | null;
-  co2_avg_lrp: number | null;
-  hb_avg: number | null;
-  hb_avg_lrp: number | null;
-  wbc_avg: number | null;
-  wbc_avg_lrp: number | null;
-};
-export type LongRangeEntry = {
-  day: number;
-  slot: number;
-  chloride_avg: number | null;
-  chloride_avg_lrp: number | null;
-  glucose_avg: number | null;
-  glucose_avg_lrp: number | null;
-  plt_avg: number | null;
-  plt_avg_lrp: number | null;
-  sodium_avg: number | null;
-  sodium_avg_lrp: number | null;
-};
+} & { [key: string]: number | null };
 
 export type VitalDataEntry = {
   day: number;
   slot: number;
-  chloride_avg: number | null;
-  chloride_avg_lrp: number | null;
-  glucose_avg: number | null;
-  glucose_avg_lrp: number | null;
-  plt_avg: number | null;
-  plt_avg_lrp: number | null;
-  sodium_avg: number | null;
-  sodium_avg_lrp: number | null;
-};
+} & { [key: string]: number | null };
 
 export type PrescriptionDataEntry = {
   day: number;
@@ -125,11 +79,7 @@ export interface ITimeSeriesData {
   };
   general_data: PatientMetaData;
   binary_data: Array<PatientBinaryDataEntry>;
-  test_data: {
-    small: Array<SmallRangeEntry>;
-    mid: Array<MidRangeEntry>;
-    long: Array<LongRangeEntry>;
-  };
+  test_data: Array<RangeEntry>;
   vital_data: { [key: string]: Array<VitalDataEntry> };
   prob_data: Array<TimeSeriesEntry>;
   prescription_data: Array<PrescriptionDataEntry>;

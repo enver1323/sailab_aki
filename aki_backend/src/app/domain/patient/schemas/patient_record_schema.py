@@ -191,26 +191,12 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         top_explanations = record.get_top_explanations_by_day(self.LIMIT)
         top_explanations = top_explanations if top_explanations is not None else {}
 
-        return {
-            APIItems.SMALL.value: self._format_daily_data(
-                record,
-                TEST_SMALL_RANGE_COLUMNS,
-                top_explanations,
-                callback=self._test_data_formatter,
-            ),
-            APIItems.MID.value: self._format_daily_data(
-                record,
-                TEST_MID_RANGE_COLUMNS,
-                top_explanations,
-                callback=self._test_data_formatter,
-            ),
-            APIItems.LONG.value: self._format_daily_data(
-                record,
-                TEST_LONG_RANGE_COLUMNS,
-                top_explanations,
-                callback=self._test_data_formatter,
-            ),
-        }
+        return self._format_daily_data(
+            record,
+            {**TEST_SMALL_RANGE_COLUMNS, **TEST_MID_RANGE_COLUMNS, **TEST_LONG_RANGE_COLUMNS},
+            top_explanations,
+            callback=self._test_data_formatter,
+        )
 
     def _format_vital_data(
             self,

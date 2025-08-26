@@ -1,8 +1,8 @@
 import { ITimeSeriesData, TimeSeriesEntry } from "@/types/patientDetails"
 import React, { useState } from "react"
-import PredictionGraph from "../graphs/PredictionGraph"
-import Spacer from "../utils/spacer"
-import { PatientLevelData } from "./PatientLevelData"
+import PredictionGraph from "@/components/graphs/PredictionGraph"
+import Spacer from "@/components/utils/spacer"
+import { PatientLevelData } from "@/components/patient/PatientLevelData"
 
 export const PatientPredictionData: React.FC<{ data: ITimeSeriesData['prob_data'] }> = ({ data }) => {
     const targetThreshold = 0.5

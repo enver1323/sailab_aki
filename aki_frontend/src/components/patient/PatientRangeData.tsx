@@ -1,39 +1,62 @@
-import { SectionSubTitle } from "@/routes/predictions/atomic/Titles"
-import { ITimeSeriesData } from "@/types/patientDetails"
-import React from "react"
-import styled from "styled-components"
-import RangeGraph from "../graphs/RangeGraph"
+import styled from "styled-components";
+import { useEffect } from "react";
 
-
-const GridWrapper = styled.div`
-    display: grid;
-    grid-template-columns: repeat(3,minmax(0,1fr));
-`
-
-const GridItemBinaryValueSpan = styled.span`
-    color: #ff9b00;
-`
+import { ITimeSeriesData } from "@/types/patientDetails";
+import { SectionSubTitle } from "@/routes/predictions/atomic/Titles";
+import RangeGraph from "@/components/graphs/RangeGraph";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { DataKeySelector } from "@/components/patient/atomic/DataKeySelector";
 
 const GridItemWrapper = styled.div`
-    font-weight: ${(props) => props.theme.font.weight.normal};
-    font-size: ${(props) => props.theme.font.size.sm};
-`
+  font-weight: ${(props) => props.theme.font.weight.normal};
+  font-size: ${(props) => props.theme.font.size.sm};
+`;
 
-const GridItem: React.FC<React.PropsWithChildren> = ({ children }) => <GridItemWrapper>{children}</GridItemWrapper>
+const GraphRow = styled.div`
+  display: flex;
+`;
 
-export const PatientRangeData: React.FC<{ data: ITimeSeriesData['test_data'] }> = ({ data }) => {
-    return <GridWrapper>
-        <GridItem key="small">
-            <SectionSubTitle>작은 범위</SectionSubTitle>
-            <RangeGraph data={data.small} />
-        </GridItem>
-        <GridItem key="mid">
-            <SectionSubTitle>중간 범위</SectionSubTitle>
-            <RangeGraph data={data.mid} />
-        </GridItem>
-        <GridItem key="long">
-            <SectionSubTitle>큰 범위</SectionSubTitle>
-            <RangeGraph data={data.long} />
-        </GridItem>
-    </GridWrapper>
-}
+const GridItem: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <GridItemWrapper>{children}</GridItemWrapper>
+);
+
+const COLLECTIONS = {
+  "작은 범위": ["albumin", "bilirubin", "creatinine", "potassium"],
+  "중간 범위": ["alt", "ast", "bun", "calcium", "co2", "hb", "wbc"],
+  "큰 범위": ["chloride", "glucose", "plt", "sodium"],
+};
+
+export const PatientRangeData: React.FC<{ data: ITimeSeriesData["test_data"] }> = ({ data }) => {
+  const [dataKeys, setDataKeys] = useLocalStorage("patient.selectedRangeKeys", ["creatinine"]);
+  const allDataKeys = data.length > 0 ? Object.keys(data[0]) : [];
+  useEffect(() => {
+    setDataKeys(dataKeys.filter((key: string) => allDataKeys.includes(key)));
+  }, []);
+
+  const filteredData = data.map((datum) => ({
+    day: datum.day,
+    slot: datum.slot,
+    ...Object.fromEntries(dataKeys.map((dataKey: string) => [dataKey, datum[dataKey]])),
+  }));
+
+  const filteredDataKeys = allDataKeys.filter((key: string) => {
+    return !(key.includes("_lrp") || key in { date: true, day: true, slot: true });
+  });
+
+  return (
+    <GridItem>
+      <SectionSubTitle>범위</SectionSubTitle>
+      <GraphRow>
+        <div>
+          <DataKeySelector
+            pool={filteredDataKeys}
+            selected={dataKeys}
+            setSelected={setDataKeys}
+            collections={COLLECTIONS}
+          />
+        </div>
+        <RangeGraph data={filteredData} />
+      </GraphRow>
+    </GridItem>
+  );
+};
