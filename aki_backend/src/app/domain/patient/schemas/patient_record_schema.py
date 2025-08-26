@@ -244,7 +244,7 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         top_explanations = top_explanations if top_explanations is not None else {}
 
         return {
-            col.upper(): self._format_vital_data(
+            col: self._format_vital_data(
                 record,
                 col,
                 f"{col}_avg",

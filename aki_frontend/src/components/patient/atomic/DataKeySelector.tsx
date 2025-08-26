@@ -5,15 +5,14 @@ import Input from "@/components/global/atoms/Input";
 
 const Label = styled.label`
   text-wrap: nowrap;
-`
-
+`;
 
 export const DataKeySelector: React.FC<{
   pool: Array<string>;
   selected: Array<string>;
   setSelected: (selected: Array<string>) => void;
-  collections: { [name: string]: Array<string> };
-}> = ({ pool, selected, setSelected, collections }) => {
+  collections: { [name: string]: string[] };
+}> = ({ pool, selected, setSelected, collections = {} }) => {
   const selectedSet = new Set(selected);
 
   const onSelectedChange = (key: string) => {
@@ -57,7 +56,7 @@ export const DataKeySelector: React.FC<{
           </Label>
         </p>
       ))}
-      <hr />
+      {Object.keys(collections).length > 0 ? <hr /> : ''}
       {pool.map((key) => (
         <p key={key}>
           <Label>
