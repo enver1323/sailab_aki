@@ -39,9 +39,7 @@ const CellText = styled.p``;
 const columns: ColumnDef<PatientMetaData, any>[] = [
   columnHelper.accessor("p_id", {
     header: "환자번호",
-    cell: (val) => (
-      <CellText>{val.getValue()}</CellText>
-    ),
+    cell: (val) => <CellText>{val.getValue()}</CellText>,
   }),
   // columnHelper.accessor("patient.name", {
   //   header: "환자명",
@@ -81,14 +79,14 @@ const columns: ColumnDef<PatientMetaData, any>[] = [
   }),
   columnHelper.accessor("sex", {
     header: "성별",
-    cell: (val) => <CellText>{val.getValue() == 0 ? '여자' : '남자'}</CellText>,
+    cell: (val) => <CellText>{val.getValue() == 0 ? "여자" : "남자"}</CellText>,
   }),
   columnHelper.accessor("bmi", {
     header: "BMI",
     cell: (val) => <CellText>{val.getValue()}</CellText>,
   }),
   columnHelper.accessor("b_cr", {
-    header: "기지 크레아티닌",
+    header: "기저 크레아티닌",
     cell: (val) => <CellText>{val.getValue()}</CellText>,
   }),
   columnHelper.accessor("department", {
@@ -97,7 +95,11 @@ const columns: ColumnDef<PatientMetaData, any>[] = [
   }),
   columnHelper.accessor("icu", {
     header: "중환자실",
-    cell: (val) => <CellText>{!!val.getValue() ? <MdOutlineCheckBox /> : <MdOutlineCheckBoxOutlineBlank />}</CellText>,
+    cell: (val) => (
+      <CellText>
+        {!!val.getValue() ? <MdOutlineCheckBox /> : <MdOutlineCheckBoxOutlineBlank />}
+      </CellText>
+    ),
   }),
 ];
 

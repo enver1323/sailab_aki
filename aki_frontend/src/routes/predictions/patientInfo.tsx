@@ -38,7 +38,7 @@ const PatientInfo = () => {
           )}
           {data?.general_data && (
             <>
-              <SectionTitle>기분 정부</SectionTitle>
+              <SectionTitle>기본 정보</SectionTitle>
               <PatientBasicInfoTable data={[data.general_data]} />
               <Spacer height={30} />
             </>
