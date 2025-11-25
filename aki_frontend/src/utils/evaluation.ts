@@ -5,16 +5,14 @@ export const getGraphEvaluator = () => {
   const { setPayload, setPos, wrapperRef } = useEvaluation()
 
   const evaluator = (payload: any, event: GraphClickSyntheticEvent) => {
-    console.log(payload);
-    
     if (!payload.activePayload || payload.activePayload.length === 0) return
 
     const dataKeys = payload.activePayload.map((item: any) => item.name)
     const dataPayload = payload.activePayload[0].payload
     const entriesExist = dataKeys.some((key: string) => key
       && key in dataPayload
-      && !!dataPayload[key]
-      && (Array.isArray(dataPayload[key]) ? dataPayload[key].every((item: number | null) => !!item) : true)
+      && dataPayload[key] !== null
+      && (Array.isArray(dataPayload[key]) ? dataPayload[key].every((item: number | null) => item !== null) : true)
     )
 
     if (!entriesExist) return

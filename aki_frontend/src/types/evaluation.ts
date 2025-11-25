@@ -12,7 +12,7 @@ export type EvaluationPopupPos = {
 export type GraphPayload = {
     name: string,
     dataKey: string,
-    payload: { [key: string]: number | null | Array<number> },
+    payload: { [key: string]: number | null | Array<number> | string },
     color: string,
 }
 

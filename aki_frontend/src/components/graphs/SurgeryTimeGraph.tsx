@@ -11,6 +11,7 @@ import {
 import { COLORS } from "@/components/utils/graphUtils"
 import { SurgicalDataEntry } from "@/types/patientDetails";
 import { Payload, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import { getGraphEvaluator } from "@/utils/evaluation";
 
 const CustomTooltip: React.FC<TooltipProps<any, any>> = (props) => {
     const { payload } = props
@@ -50,12 +51,15 @@ const SurgeryTimeGraph: React.FC<{ data: SurgicalDataEntry[] }> = ({ data }) => 
             dataColumns.push(k)
     }
 
+    const clickHandler = getGraphEvaluator()
+
     return (
         <ResponsiveContainer width="100%" height={height}>
             <BarChart
                 data={data.map((item) => ({
                     ...item,
                 }))}
+                onClick={clickHandler}
             >
                 <YAxis yAxisId="value" tickCount={5} fontSize={14} />
                 <XAxis dataKey="day" tickCount={7} fontSize={14} />

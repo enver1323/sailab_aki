@@ -1,5 +1,7 @@
+import { GraphClickSyntheticEvent } from "@/types/evaluation"
 import { PatientBinaryDataEntry } from "@/types/patientDetails"
-import React from "react"
+import { getGraphEvaluator } from "@/utils/evaluation"
+import React, { BaseSyntheticEvent } from "react"
 import { MdStarRate } from "react-icons/md"
 import styled from "styled-components"
 
@@ -28,19 +30,43 @@ const GridItemStar = styled(MdStarRate)`
   }
 `;
 
+const GridItemTitle = styled.span`
+  font-weight: ${(props) => props.theme.font.weight.bold};
+  cursor: pointer;
+`
 
-const GridItem: React.FC<{ field: string, value: number | null, lrp_value: boolean, isBinary: boolean }> = ({ field, value, lrp_value, isBinary }) => {
+
+const GridItem: React.FC<{ field: string, value: number | null, lrp_value: boolean, isBinary: boolean, onClick: (field: string, value: number | null, event: GraphClickSyntheticEvent) => void }> = ({ field, value, lrp_value, isBinary, onClick }) => {
     return <GridItemWrapper>
-        <strong>{field}</strong>
+        <GridItemTitle onClick={(event: GraphClickSyntheticEvent) => onClick(field, value, event)}>{field}</GridItemTitle>
         {isBinary ? (value == 1 && <GridItemBinaryValue />) : `: ${value}`}
         {lrp_value && <GridItemStar color='ff9b00' />}
     </GridItemWrapper>
 }
 
 export const PatientBinaryInfo: React.FC<{ data: PatientBinaryDataEntry[] }> = ({ data }) => {
+    const evaluationHandler = getGraphEvaluator()
+    const handleClick = (field: string, value: number | null, event: GraphClickSyntheticEvent) => {
+        const color = '#000'
+
+        const payload = {
+            activePayload: [{
+                name: field,
+                dataKey: field,
+                color: color,
+                fill: color,
+                stroke: color,
+                value: value,
+                payload: { [field]: value }
+            }]
+        }
+
+        evaluationHandler(payload, event)
+
+    }
     return <GridWrapper>
         {data.map((item: PatientBinaryDataEntry) =>
-            <GridItem {...item} isBinary={item.field != 'cci'} key={item.field} />
+            <GridItem {...item} isBinary={item.field != 'cci'} onClick={handleClick} key={item.field} />
         )}
     </GridWrapper>
 }

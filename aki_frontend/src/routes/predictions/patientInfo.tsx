@@ -13,7 +13,7 @@ import styled from "styled-components";
 import PrescriptionGraph from "@/components/graphs/PrescriptionGraph";
 import SurgeryTimeGraph from "@/components/graphs/SurgeryTimeGraph";
 import { PatientPredictionData } from "@/components/patient/PatientPredictionData";
-import { EvaluationPopup } from "@/components/popup/GraphEvaluationPopup";
+import { EvaluationPopup } from "@/components/popup/EvaluationPopup";
 import { EvaluationProvider } from "@/hooks/useEvaluation";
 
 
