@@ -89,7 +89,6 @@ SURGERY_COLUMNS = [
     "surgery_time",
     "anes_non_general",
     "anes_general",
-    "anes_non_general",
     "asa_class",
     "surgery_time",
     "op_risk_score",

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Legend,
   Line,
@@ -13,6 +13,7 @@ import { COLORS, getDayAxisKey } from "@/components/utils/graphUtils";
 import { StarDot } from "@/components/graphs/atomic/LRPStarDot";
 import { RangeEntry } from "@/types/patientDetails";
 import { DateTooltip } from "@/components/utils/GraphTooltip";
+import { getGraphEvaluator } from "@/utils/evaluation"
 
 type PredictionGraphProps = {
   data: Array<RangeEntry>;
@@ -30,6 +31,9 @@ const RangeGraph: React.FC<PredictionGraphProps> = ({ data }) => {
     if (k.substring(k.length - 3) === "lrp") lrpColumns.push(k);
     else dataColumns.push(k);
   }
+
+  const clickHandler = getGraphEvaluator()
+
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart
@@ -37,6 +41,7 @@ const RangeGraph: React.FC<PredictionGraphProps> = ({ data }) => {
           ...item,
           tick: getDayAxisKey(item),
         }))}
+        onClick={clickHandler}
       >
         <YAxis yAxisId="value" tickCount={5} />
         <XAxis dataKey="tick" tickCount={7}>

@@ -13,12 +13,15 @@ import styled from "styled-components";
 import PrescriptionGraph from "@/components/graphs/PrescriptionGraph";
 import SurgeryTimeGraph from "@/components/graphs/SurgeryTimeGraph";
 import { PatientPredictionData } from "@/components/patient/PatientPredictionData";
+import { EvaluationPopup } from "@/components/popup/GraphEvaluationPopup";
+import { EvaluationProvider } from "@/hooks/useEvaluation";
 
 
 const PrescriptionSurgicalRow = styled.div`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 `
+
 
 const PatientInfo = () => {
   const { patientMedicalRecordID } = useParams();
@@ -36,43 +39,46 @@ const PatientInfo = () => {
               <Spacer height={30} />
             </>
           )}
-          {data?.general_data && (
-            <>
-              <SectionTitle>기본 정보</SectionTitle>
-              <PatientBasicInfoTable data={[data.general_data]} />
-              <Spacer height={30} />
-            </>
-          )}
-          {data?.binary_data && (
-            <>
-              <SectionTitle>기저질환</SectionTitle>
-              <PatientBinaryInfo data={data.binary_data} />
-              <Spacer height={30} />
-            </>
-          )}
-          {data?.test_data && (
-            <>
-              <SectionTitle>검사 결과</SectionTitle>
-              <PatientRangeData data={data.test_data} />
-              <Spacer height={30} />
-            </>
-          )}
-          {data?.vital_data && (
-            <>
-              <SectionTitle>검사 결과</SectionTitle>
-              <PatientVitalData data={data.vital_data} />
-              <Spacer height={30} />
-            </>
-          )}
-          {(data?.prescription_data || data?.surgical_data) && (
-            <>
-              <SectionTitle>약품 처방 및 수술 데이터</SectionTitle>
-              <PrescriptionSurgicalRow>
-                <PrescriptionGraph data={data.prescription_data!} />
-                <SurgeryTimeGraph data={data.surgical_data} />
-              </PrescriptionSurgicalRow>
-            </>
-          )}
+          <EvaluationProvider>
+            <EvaluationPopup />
+            {data?.general_data && (
+              <>
+                <SectionTitle>기본 정보</SectionTitle>
+                <PatientBasicInfoTable data={[data.general_data]} />
+                <Spacer height={30} />
+              </>
+            )}
+            {data?.binary_data && (
+              <>
+                <SectionTitle>기저질환</SectionTitle>
+                <PatientBinaryInfo data={data.binary_data} />
+                <Spacer height={30} />
+              </>
+            )}
+            {data?.test_data && (
+              <>
+                <SectionTitle>검사 결과</SectionTitle>
+                <PatientRangeData data={data.test_data} />
+                <Spacer height={30} />
+              </>
+            )}
+            {data?.vital_data && (
+              <>
+                <SectionTitle>검사 결과</SectionTitle>
+                <PatientVitalData data={data.vital_data} />
+                <Spacer height={30} />
+              </>
+            )}
+            {(data?.prescription_data || data?.surgical_data) && (
+              <>
+                <SectionTitle>약품 처방 및 수술 데이터</SectionTitle>
+                <PrescriptionSurgicalRow>
+                  <PrescriptionGraph data={data.prescription_data!} />
+                  <SurgeryTimeGraph data={data.surgical_data} />
+                </PrescriptionSurgicalRow>
+              </>
+            )}
+          </EvaluationProvider>
         </AsyncBoundary>
       </PageCard>
     </DefaultLayout>

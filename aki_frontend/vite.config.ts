@@ -10,8 +10,8 @@ export default ({ mode }) => {
   return defineConfig({
     plugins: [react(), tsconfigPaths()],
     server: {
-      port: parseInt(process.env.VITE_FRONTEND_PORT),
+      port: parseInt(process.env.VITE_FRONTEND_PORT || 3000),
     },
-    base: "/static/dist"
+    // base: "/static/dist"
   });
 };

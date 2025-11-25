@@ -7,6 +7,7 @@ import { DateTooltip } from "@/components/utils/GraphTooltip";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { DataKeySelector } from "@/components/patient/atomic/DataKeySelector";
 import styled from "styled-components";
+import { getGraphEvaluator } from "@/utils/evaluation";
 
 const GraphRow = styled.div`
   display: flex;
@@ -44,6 +45,8 @@ export const PatientVitalData: React.FC<{ data: ITimeSeriesData["vital_data"] }>
     });
   });
 
+  const clickHandler = getGraphEvaluator()
+
   return (
     <GraphRow>
       <div>
@@ -55,7 +58,10 @@ export const PatientVitalData: React.FC<{ data: ITimeSeriesData["vital_data"] }>
         />
       </div>
       <ResponsiveContainer width="100%" height={height}>
-        <ComposedChart data={Object.values(flatData)}>
+        <ComposedChart
+          data={Object.values(flatData)}
+          onClick={clickHandler}
+        >
           <YAxis yAxisId="value" tickCount={5} />
           <XAxis dataKey="tick" tickCount={7}>
             <Label value="입원 후 일수" position="top" style={{ textAnchor: "middle" }} />

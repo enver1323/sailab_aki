@@ -17,6 +17,8 @@ import {
 } from "@/components/utils/graphUtils";
 import { ITimeSeriesData } from "@/types/patientDetails";
 import React from "react";
+import { getGraphEvaluator } from "@/utils/evaluation";
+import { GraphClickSyntheticEvent } from "@/types/evaluation";
 
 const DateTooltip: React.FC<TooltipProps<any, any>> = (props) => {
   const { payload } = props;
@@ -65,10 +67,41 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
   const xTicksMapper = makeMapper(xTicks);
 
   const dataColumnsMapper = makeMapper(dataColumns);
+  const filteredDataColumns = dataColumns.filter((col) => scatterData[col].length > 0)
+  const strokeWidth = 3
+
+  const graphEvaluator = getGraphEvaluator()
+  const clickHandler = (payload: any, event: GraphClickSyntheticEvent) => {
+    const daySlot = Math.floor(payload.xValue + 0.1)
+    const day = Math.ceil((daySlot + 1) / 3)
+    const slot = (daySlot + 1) % 3
+    const column = dataColumns[Math.round(payload.yValue)]
+
+    const dataExists = data.some((item) => item.day == day && item.slot == slot && item[column] !== null)
+    if (!dataExists) return
+
+    const columnId = filteredDataColumns.indexOf(column)
+    const color = COLORS[columnId]
+
+    const formattedPayload = {
+      ...payload,
+      activePayload: [{
+        name: column,
+        dataKey: column,
+        color: color,
+        fill: color,
+        stroke: color,
+        strokeWidth: strokeWidth,
+        value: 1,
+        payload: { [column]: 1, day, slot }
+      }]
+    }
+    graphEvaluator(formattedPayload, event)
+  }
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ScatterChart>
+      <ScatterChart onClick={clickHandler}>
         <CartesianGrid />
         <YAxis
           fontSize={10}
@@ -84,8 +117,7 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
           ticks={Object.values(xTicksMapper)}
           tickFormatter={(val) => xTicks[val]}
         />
-        {dataColumns
-          .filter((col) => scatterData[col].length > 0)
+        {filteredDataColumns
           .map((col, id) => (
             <Scatter
               name={col}
@@ -95,11 +127,11 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
                 y: dataColumnsMapper[y],
               }))}
               stroke={COLORS[id]}
-              strokeWidth={3}
+              strokeWidth={strokeWidth}
               key={col}
               fill={COLORS[id]}
               shape={
-                <Rectangle width={40} height={10} fill={COLORS[id]} strokeWidth={COLORS[id]} />
+                <Rectangle width={40} height={10} fill={COLORS[id]} strokeWidth={strokeWidth} />
               }
             />
           ))}
