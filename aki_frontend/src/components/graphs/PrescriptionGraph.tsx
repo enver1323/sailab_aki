@@ -72,12 +72,13 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
 
   const graphEvaluator = getGraphEvaluator()
   const clickHandler = (payload: any, event: GraphClickSyntheticEvent) => {
-    const daySlot = Math.floor(payload.xValue + 0.1)
+    const daySlot = Math.floor(payload.xValue)
     const day = Math.ceil((daySlot + 1) / 3)
-    const slot = (daySlot + 1) % 3
+    const slot = daySlot % 3 + 1
     const column = dataColumns[Math.round(payload.yValue)]
 
     const dataExists = data.some((item) => item.day == day && item.slot == slot && item[column] !== null)
+    
     if (!dataExists) return
 
     const columnId = filteredDataColumns.indexOf(column)

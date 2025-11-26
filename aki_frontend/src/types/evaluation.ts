@@ -19,8 +19,9 @@ export type GraphPayload = {
 export type EvaluationPayload = Array<GraphPayload> | null;
 
 export type EvaluationContextType = {
-    evaluation: null,
+    evaluation: EvaluationType,
     setEvaluation: (data: any) => void,
+    updateEvaluation: (key: string, value: number) => void,
     payload: EvaluationPayload,
     setPayload: (data: any) => void,
     pos: EvaluationPopupPos,
@@ -37,3 +38,13 @@ export interface GraphClickSyntheticEvent extends SyntheticEvent {
     pageX: number,
     pageY: number,
 }
+
+export const EVALUATION_OPTIONS = {
+    0: "Not Important",
+    1: "Important",
+    2: "Very Important",
+}
+
+export type EvaluationFormPayload = {
+    [key: string]: number
+} | null

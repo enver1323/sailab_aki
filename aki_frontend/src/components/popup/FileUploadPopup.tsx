@@ -37,7 +37,7 @@ const EmptyFileUpload: React.FC = () => {
 
 const FileUploadModal: React.FC<IFileUploadModalProps> = (props) => {
   return (
-    <LayoutPopup isOpen={props.isOpen} onClose={props.onCloseHandler ?? voidFn} height={"500px"}>
+    <LayoutPopup isOpen={props.isOpen} onClose={props.onCloseHandler ?? voidFn} height={"530px"}>
       <FileUpload
         customUpload
         uploadHandler={props.uploadHandler}

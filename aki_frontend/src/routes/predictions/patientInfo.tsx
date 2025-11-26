@@ -14,7 +14,10 @@ import PrescriptionGraph from "@/components/graphs/PrescriptionGraph";
 import SurgeryTimeGraph from "@/components/graphs/SurgeryTimeGraph";
 import { PatientPredictionData } from "@/components/patient/PatientPredictionData";
 import { EvaluationPopup } from "@/components/popup/EvaluationPopup";
-import { EvaluationProvider } from "@/hooks/useEvaluation";
+import { EvaluationProvider, useEvaluation } from "@/hooks/useEvaluation";
+import { PatientEvaluationPreview } from "@/components/patient/PatientEvaluationPreview";
+import { useEvaluationShow } from "@/hooks/queries/useEvaluationData";
+import { useEffect } from "react";
 
 
 const PrescriptionSurgicalRow = styled.div`
@@ -26,7 +29,15 @@ const PrescriptionSurgicalRow = styled.div`
 const PatientInfo = () => {
   const { patientMedicalRecordID } = useParams();
 
-  const { data, isLoading, isError } = useGetPatientAKIPrediction(parseInt(patientMedicalRecordID!));
+  const recordID = parseInt(patientMedicalRecordID ?? '')
+
+  const { data, isLoading, isError } = useGetPatientAKIPrediction(recordID);
+  const { data: evaluation } = useEvaluationShow(recordID)
+  const { setEvaluation } = useEvaluation()
+
+  useEffect(() => {
+    setEvaluation(evaluation)
+  }, [evaluation])
 
   return (
     <DefaultLayout currentPage={"predictions"} subPage={"dashboard"}>
@@ -78,6 +89,7 @@ const PatientInfo = () => {
                 </PrescriptionSurgicalRow>
               </>
             )}
+            <PatientEvaluationPreview patientMedicalRecordId={recordID} />
           </EvaluationProvider>
         </AsyncBoundary>
       </PageCard>

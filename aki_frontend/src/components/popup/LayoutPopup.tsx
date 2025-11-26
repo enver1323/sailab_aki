@@ -66,13 +66,14 @@ const CloseButton = styled.button`
   }
 `;
 const LayerPopupScrollContainer = styled.div`
-  /* overflow: auto; */
+  overflow: auto;
 
   height: 100%;
   width: 100%;
 
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
+  flex-grow: 1;
 `;
 
 const FixedBottomArea = styled.div`
@@ -82,6 +83,7 @@ const FixedBottomArea = styled.div`
   align-items: center;
   flex-direction: column;
   gap: 10px;
+  padding: 28px 24px;
 `;
 
 export interface LayoutPopupType {
@@ -132,8 +134,8 @@ export default function LayoutPopup({
           </Header>
           <LayerPopupScrollContainer>
             {children}
-            <FixedBottomArea>{footer}</FixedBottomArea>
           </LayerPopupScrollContainer>
+          <FixedBottomArea>{footer}</FixedBottomArea>
         </Container>
       )}
     </ScrimPopupContainer>

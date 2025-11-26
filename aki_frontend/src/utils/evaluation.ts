@@ -30,6 +30,7 @@ export const getGraphEvaluator = () => {
 
 export const getEvaluationKey = (item: GraphPayload) => {
   const { payload } = item
+  
   let key = ""
 
   if ("day" in payload && payload.day !== null)

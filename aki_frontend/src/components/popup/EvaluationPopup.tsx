@@ -1,8 +1,8 @@
 import { useEvaluation } from "@/hooks/useEvaluation"
-import { EvaluationPayload, GraphPayload } from "@/types/evaluation"
+import { EVALUATION_OPTIONS, EvaluationPayload, GraphPayload } from "@/types/evaluation"
 import { getEvaluationKey } from "@/utils/evaluation"
 import { ChangeEvent, useEffect, useRef } from "react"
-import _ from 'lodash';
+import _, { fromPairs } from 'lodash';
 import styled from "styled-components"
 
 const EvaluationCard = styled.div<{ x: number, y: number }>`
@@ -28,20 +28,16 @@ const EvaluationSelect = styled.select`
     display: block;
 `
 
-const EVALUATION_OPTIONS = {
-    0: "Not Important",
-    1: "Important",
-    2: "Very Important",
-}
+
 
 
 const formatPayload = (payload: EvaluationPayload) => {
     if (payload === null || payload.length === 0) return []
 
     const formattedPayload: Array<GraphPayload> = []
-    const formattedData: {[key: string]: number} = {}
+    const formattedData: { [key: string]: number | string | null } = {}
 
-    const clone = (item: GraphPayload, cloneKey: string, cloneValue: number) => {
+    const clone = (item: GraphPayload, cloneKey: string, cloneValue: number | string | null) => {
         formattedPayload.push({ color: item.color, dataKey: cloneKey, name: cloneKey, payload: formattedData })
         formattedData[cloneKey] = cloneValue
     }
@@ -49,29 +45,33 @@ const formatPayload = (payload: EvaluationPayload) => {
     const cloneAndFormatAreaItem = (item: GraphPayload) => {
         const dataValues = (item.payload[item.dataKey] ?? [0, 0]) as Array<number>
         const dataKey = item.dataKey.slice(0, item.dataKey.length - 5)
-        
+
         clone(item, `${dataKey}_min`, dataValues[0])
         clone(item, `${dataKey}_max`, dataValues[1])
     }
 
     payload.forEach((item: GraphPayload) => {
-        switch(true){
+        switch (true) {
             case item.dataKey.endsWith('_lrp'):
                 break
             case item.dataKey.endsWith('_area'):
                 cloneAndFormatAreaItem(item)
                 break
-            default: 
+            default:
                 clone(item, item.dataKey, item.payload[item.dataKey] as number)
         }
     })
+
+    const dataValues = payload[0].payload
+    formattedData['day'] = "day" in dataValues ? dataValues.day as number : null
+    formattedData['slot'] = "slot" in dataValues ? dataValues.slot as number : null
 
     return formattedPayload
 }
 
 export const EvaluationPopup: React.FC = () => {
-    const { payload, pos, setPayload, evaluation, setEvaluation } = useEvaluation()
-    const cardRef = useRef<HTMLDivElement>(null)    
+    const { payload, pos, setPayload, evaluation, updateEvaluation } = useEvaluation()
+    const cardRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const handleClickOutside: EventListener = (event: Event) => {
@@ -85,10 +85,8 @@ export const EvaluationPopup: React.FC = () => {
     }, [cardRef]);
 
     const onSelectChange = (selected: GraphPayload, event: ChangeEvent<HTMLSelectElement>) => {
-        setEvaluation({
-            ...(evaluation ?? {}),
-            [getEvaluationKey(selected)]: event.target.value
-        })
+        const value = parseInt(event.target.value)
+        updateEvaluation(getEvaluationKey(selected), value)
     }
     const getCurEval = (item: GraphPayload) => {
         const key = getEvaluationKey(item)

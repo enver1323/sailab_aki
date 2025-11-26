@@ -4,7 +4,7 @@ import { useAPI } from "@/hooks/useAPI";
 import { User, UserFormPayload, UserProps } from "@/types/user";
 import { AxiosError } from "axios";
 import { UserDetailsResponse } from "@/types/responses";
-import { useAuth } from "../useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 export const useUserListData = (page: number, search?: string) => {
   const api = useAPI();
