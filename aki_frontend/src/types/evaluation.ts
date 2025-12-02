@@ -1,5 +1,10 @@
 import { MutableRefObject, SyntheticEvent } from "react"
 
+export type EvaluationRecord = {
+    column_name: string,
+    value: number,
+}
+
 export type EvaluationType = {
     [key: string]: number
 } | null

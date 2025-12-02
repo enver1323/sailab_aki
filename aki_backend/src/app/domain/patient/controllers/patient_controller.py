@@ -7,6 +7,7 @@ from app.core.constants import APIItems
 from app.core.generics import ListController, Controller
 from app.domain.user.entities.user import User
 from app.domain.patient.entities.patient import PatientMedicalRecord, Patient
+from app.domain.patient.entities.evaluation import UserPatientMedicalRecordEvaluation
 from app.domain.patient.queries.patient_medical_record_query import (
     PatientMedicalRecordQuery,
 )
@@ -14,6 +15,9 @@ from app.domain.patient.services.patient_service import PatientService
 from app.domain.patient.services.medical_record_service import MedicalRecordService
 from app.domain.patient.services.patient_medical_record_service import (
     PatientMedicalRecordService,
+)
+from app.domain.patient.services.user_patient_medical_record_evaluation_service import (
+    UserPatientMedicalRecordEvaluationService,
 )
 from app.domain.patient.schemas.patient_schema import (
     PatientCreateSchema,
@@ -25,6 +29,9 @@ from app.domain.patient.schemas.patient_record_schema import (
     PatientMedicalRecordPredictionsSchema,
     PatientMedicalRecordUpdateSchema,
 )
+from app.domain.patient.schemas.user_patient_medical_record_evaluation_schema import (
+    UserPatientMedicalRecordEvaluationSchema,
+)
 from app.core.view_decorators import admin_required
 
 patient_schema = PatientSchema()
@@ -32,6 +39,9 @@ patient_list_schema = PatientListSchema()
 patient_create_schema = PatientCreateSchema()
 patient_record_update_schema = PatientMedicalRecordUpdateSchema()
 patient_record_predictions_schema = PatientMedicalRecordPredictionsSchema()
+user_patient_medical_record_evaluation_schema = (
+    UserPatientMedicalRecordEvaluationSchema()
+)
 
 
 def get_records_keys_map(
@@ -69,24 +79,24 @@ class PatientList(ListController):
 
         if data["search"]:
             records_query = records_query.search(data["search"])
-            
+
         if bool(data["prediction"]):
             records_query = records_query.filter(
                 PatientMedicalRecord.prediction_state.in_(
                     [PatientMedicalRecord.PredictionStates.mild]
                 )
             )
-            
+
         if data["start_date"] is not None:
             records_query = records_query.filter(
                 PatientMedicalRecord.reference_date >= data["start_date"]
             )
-            
+
         if data["end_date"] is not None:
             records_query = records_query.filter(
                 PatientMedicalRecord.reference_date <= data["end_date"]
             )
-            
+
         records_query = records_query.order_by(
             PatientMedicalRecord.reference_date.desc()
         )
@@ -175,7 +185,7 @@ class PatientMedicalRecordDetails(Controller):
 
         if record is None:
             return cls.response(404)
-        
+
         PatientMedicalRecordService.view(record, user.id)
 
         return cls.response(data=patient_record_schema.dump(record))
@@ -229,7 +239,7 @@ class PatientMedicalRecordPredictions(Controller):
 
         if record is None:
             return cls.response(404)
-        
+
         user = User.find_by_id(get_jwt_identity())
         PatientMedicalRecordService.view(record, user.id)
 
@@ -255,4 +265,42 @@ class PatientUserInterestController(Controller):
                 APIItems.STATUS.value: status,
                 APIItems.PATIENT.value: patient_schema.dump(patient),
             },
+        )
+
+
+class PatientMedicalRecordEvaluations(Controller):
+    @classmethod
+    def _get_formatted_records(cls, user_id: int, patient_medical_record_id: int):
+        records = UserPatientMedicalRecordEvaluation.find_by_ids(
+            user_id, patient_medical_record_id
+        )
+        return user_patient_medical_record_evaluation_schema.dump(records, many=True)
+
+    @classmethod
+    @jwt_required()
+    def get(cls, patient_medical_record_id: int):
+        user_id = get_jwt_identity()
+
+        return cls.response(
+            200, data=cls._get_formatted_records(patient_medical_record_id, user_id)
+        )
+
+    @classmethod
+    @jwt_required()
+    def put(cls, patient_medical_record_id: int):
+        request_json = request.get_json()
+
+        record = PatientMedicalRecord.query.where_key(patient_medical_record_id).first()
+
+        if record is None:
+            return cls.response(404)
+
+        user_id = get_jwt_identity()
+
+        UserPatientMedicalRecordEvaluationService.update(
+            user_id, record.id, request_json
+        )
+
+        return cls.response(
+            200, data=cls._get_formatted_records(patient_medical_record_id, user_id)
         )

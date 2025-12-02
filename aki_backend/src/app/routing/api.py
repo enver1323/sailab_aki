@@ -16,7 +16,8 @@ from app.domain.patient.controllers.patient_controller import (
     PatientMedicalRecordDetails,
     PatientMedicalRecordPredictions,
     PatientUserInterestController,
-    PatientEvaluation
+    PatientEvaluation,
+    PatientMedicalRecordEvaluations,
 )
 from app.domain.user.controllers.department_controller import (
     DepartmentList,
@@ -39,6 +40,7 @@ routes = {
     '/patients/evaluate': PatientEvaluation,
     '/patients/records/<int:patient_medical_record_id>': PatientMedicalRecordDetails,
     '/patients/predictions/<int:patient_medical_record_id>': PatientMedicalRecordPredictions,
+    '/patients/evaluations/<int:patient_medical_record_id>': PatientMedicalRecordEvaluations,
     '/patients/interest': PatientUserInterestController,
 
     '/departments': DepartmentList,

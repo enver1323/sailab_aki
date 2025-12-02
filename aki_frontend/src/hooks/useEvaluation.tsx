@@ -1,6 +1,7 @@
-import { createContext, useState, useContext, useMemo, useRef, createRef } from "react";
+import { createContext, useState, useContext, useMemo, useRef, createRef, useEffect } from "react";
 import { EvaluationContextType, EvaluationType } from "@/types/evaluation";
 import styled from "styled-components";
+import { useEvaluationShow } from "./queries/useEvaluationData";
 
 const EvaluationContext = createContext<EvaluationContextType>({
   evaluation: null,
@@ -17,7 +18,7 @@ const EvaluationWrapper = styled.div`
   position: relative;
 `;
 
-export const EvaluationProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const EvaluationProvider: React.FC<React.PropsWithChildren & {patientMedicalRecordId: number}> = ({ patientMedicalRecordId, children }) => {
   const [evaluation, setEvaluation] = useState<EvaluationType>(null)
   const [payload, setPayload] = useState(null)
   const [pos, setPos] = useState({ x: 0, y: 0 })
@@ -28,6 +29,14 @@ export const EvaluationProvider: React.FC<React.PropsWithChildren> = ({ children
       : Object.fromEntries(Object.entries({ ...evaluation }).filter(([itemKey,]) => itemKey !== key))
     setEvaluation(updatedEvaluation)
   }
+
+  const { data: evaluations } = useEvaluationShow(patientMedicalRecordId)
+
+  useEffect(() => {
+    if (evaluations) {
+      setEvaluation(evaluations)
+    }
+  }, [evaluations, setEvaluation])
 
   const wrapperRef = useRef<HTMLDivElement>(null)
 

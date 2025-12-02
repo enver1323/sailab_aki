@@ -16,8 +16,6 @@ import { PatientPredictionData } from "@/components/patient/PatientPredictionDat
 import { EvaluationPopup } from "@/components/popup/EvaluationPopup";
 import { EvaluationProvider, useEvaluation } from "@/hooks/useEvaluation";
 import { PatientEvaluationPreview } from "@/components/patient/PatientEvaluationPreview";
-import { useEvaluationShow } from "@/hooks/queries/useEvaluationData";
-import { useEffect } from "react";
 
 
 const PrescriptionSurgicalRow = styled.div`
@@ -32,12 +30,6 @@ const PatientInfo = () => {
   const recordID = parseInt(patientMedicalRecordID ?? '')
 
   const { data, isLoading, isError } = useGetPatientAKIPrediction(recordID);
-  const { data: evaluation } = useEvaluationShow(recordID)
-  const { setEvaluation } = useEvaluation()
-
-  useEffect(() => {
-    setEvaluation(evaluation)
-  }, [evaluation])
 
   return (
     <DefaultLayout currentPage={"predictions"} subPage={"dashboard"}>
@@ -50,7 +42,7 @@ const PatientInfo = () => {
               <Spacer height={30} />
             </>
           )}
-          <EvaluationProvider>
+          <EvaluationProvider patientMedicalRecordId={recordID}>
             <EvaluationPopup />
             {data?.general_data && (
               <>

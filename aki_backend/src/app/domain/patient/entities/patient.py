@@ -117,9 +117,7 @@ class PatientMedicalRecord(Entity):
     actual_state = Column(db.Enum(PredictionStates), nullable=True)
     treatment = Column(db.Enum(Treatment), nullable=True)
     deleted_at = Column(db.DateTime, nullable=True)
-    updated_at = Column(
-        db.DateTime, server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(db.DateTime, server_default=func.now(), onupdate=func.now())
     created_at = Column(db.DateTime, default=func.now())
 
     # Relations
@@ -146,6 +144,9 @@ class PatientMedicalRecord(Entity):
     )
     medical_record = db.relationship(
         "MedicalRecord", back_populates="patient_medical_records", lazy="noload"
+    )
+    evaluations = db.relationship(
+        "UserPatientMedicalRecordEvaluation", uselist=True, lazy="noload", back_populates="patient_medical_record"
     )
 
     # @property
@@ -238,7 +239,7 @@ class PatientMedicalRecord(Entity):
         if self.prediction is None:
             return -1
 
-        predicted_logits = self.prediction.get('logits', {})
+        predicted_logits = self.prediction.get("logits", {})
         if len(predicted_logits) == 0:
             return -1
 

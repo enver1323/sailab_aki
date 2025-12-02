@@ -55,6 +55,9 @@ class User(Entity):
     actions = db.relationship(
         "ActionHistory", uselist=True, lazy='noload', back_populates='user'
     )
+    evaluations = db.relationship(
+        "UserPatientMedicalRecordEvaluation", uselist=True, lazy='noload', back_populates='user'
+    )
 
     @property
     def password(self):
