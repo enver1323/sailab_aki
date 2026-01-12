@@ -28,8 +28,11 @@ export const PatientEvaluationPreview: React.FC<{ patientMedicalRecordId: number
         mutation.mutate({ patientMedicalRecordId, data: evaluation })
     }
 
+    const nEvals = Object.entries(evaluation ?? {}).length
+    const saveBtnText = "Save" + (nEvals > 0 ? ` ${nEvals} features` : '')
+
     return <>
-        <PreviewBtn onClick={openModal}>Preview</PreviewBtn>
+        <PreviewBtn onClick={openModal}>{saveBtnText}</PreviewBtn>
         <EvaluationPreviewModal
             isOpen={isModalOpen}
             onClose={closeModal}

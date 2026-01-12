@@ -44,10 +44,16 @@ export interface GraphClickSyntheticEvent extends SyntheticEvent {
     pageY: number,
 }
 
-export const EVALUATION_OPTIONS = {
-    0: "Not Important",
-    1: "Important",
-    2: "Very Important",
+export enum EvaluationOptions {
+    NotImportant = 0,
+    Important = 1,
+    VeryImportant = 2,
+}
+
+export const EVALUATION_OPTION_TITLES = {
+    [EvaluationOptions.NotImportant]: "Not Important",
+    [EvaluationOptions.Important]: "Important",
+    [EvaluationOptions.VeryImportant]: "Very Important",
 }
 
 export type EvaluationFormPayload = {

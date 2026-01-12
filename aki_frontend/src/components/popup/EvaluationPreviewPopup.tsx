@@ -1,7 +1,8 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, MouseEventHandler } from "react";
 import styled from "styled-components";
 import LayoutPopup from "./LayoutPopup";
-import { EVALUATION_OPTIONS, EvaluationType } from "@/types/evaluation";
+import { EVALUATION_OPTION_TITLES, EvaluationOptions, EvaluationType } from "@/types/evaluation";
+import { FaTimes } from "react-icons/fa";
 
 interface IEvaluationPreviewModalProps {
     isOpen: boolean;
@@ -10,6 +11,13 @@ interface IEvaluationPreviewModalProps {
     onSave: () => void;
     onClose: VoidFunction;
 }
+
+const FooterRow = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-size: ${(props) => props.theme.font.size.sm}
+`
 
 const EvaluationRow = styled.div`
     display: flex;
@@ -39,14 +47,30 @@ const EvaluationPreviewModal: React.FC<IEvaluationPreviewModalProps> = ({ isOpen
     const onEvaluate = (key: string, event: ChangeEvent<HTMLSelectElement>) => {
         onChange(key, parseInt(event.target.value))
     }
+
+    const evaluationValues: number[] = Object.entries(evaluation ?? {}).map(([_, v]) => v)
+    const evaluationStatOptions: EvaluationOptions[] = [EvaluationOptions.VeryImportant, EvaluationOptions.Important]
+    const evaluationStats: [EvaluationOptions, number][] = evaluationStatOptions
+        .map((option) => [option, evaluationValues.filter((val: number) => val === option).length] as [EvaluationOptions, number])
+        .filter(([_, count]) => count > 0)
+
+    const nEvals = evaluationValues.length
+    const headerText = "Evaluation Preview" + (nEvals > 0 ? ` of ${nEvals} features` : '')
+
     return (
         <LayoutPopup
             isOpen={isOpen}
             onClose={onClose ?? voidFn}
-            height={"500px"}
-            header="Evaluation Preview Modal"
+            width="80rem"
+            height="50rem"
+            header={headerText}
             footer={
-                <SaveBtn onClick={onSaveClick}>Save</SaveBtn>
+                <FooterRow>
+                    <div>
+                        {evaluationStats.map(([option, count]) => <p key={`evaluation-${option}`}>{count} {EVALUATION_OPTION_TITLES[option]} features</p>)}
+                    </div>
+                    <SaveBtn onClick={onSaveClick}>Save</SaveBtn>
+                </FooterRow>
             }
         >
             <Wrapper>
@@ -54,7 +78,7 @@ const EvaluationPreviewModal: React.FC<IEvaluationPreviewModalProps> = ({ isOpen
                     <EvaluationRow key={`${key}-evaluation`}>
                         <strong key={`${key}-eval-key`}>{key}</strong>
                         <select value={value} onChange={(event: ChangeEvent<HTMLSelectElement>) => onEvaluate(key, event)} key={`${key}-eval-select`}>
-                            {Object.entries(EVALUATION_OPTIONS).map(([evalKey, evalValue]) =>
+                            {Object.entries(EVALUATION_OPTION_TITLES).map(([evalKey, evalValue]) =>
                                 <option value={evalKey} key={`${key}-eval-select-option-${evalKey}`}>{evalValue}</option>
                             )}
                         </select>

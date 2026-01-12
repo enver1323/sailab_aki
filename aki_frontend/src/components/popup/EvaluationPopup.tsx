@@ -1,5 +1,5 @@
 import { useEvaluation } from "@/hooks/useEvaluation"
-import { EVALUATION_OPTIONS, EvaluationPayload, GraphPayload } from "@/types/evaluation"
+import { EVALUATION_OPTION_TITLES, EvaluationPayload, GraphPayload } from "@/types/evaluation"
 import { getEvaluationKey } from "@/utils/evaluation"
 import { ChangeEvent, useEffect, useRef } from "react"
 import _, { fromPairs } from 'lodash';
@@ -28,9 +28,6 @@ const EvaluationSelect = styled.select`
     display: block;
 `
 
-
-
-
 const formatPayload = (payload: EvaluationPayload) => {
     if (payload === null || payload.length === 0) return []
 
@@ -58,6 +55,9 @@ const formatPayload = (payload: EvaluationPayload) => {
                 cloneAndFormatAreaItem(item)
                 break
             default:
+                const value = item.payload[item.dataKey]
+                if (value === null) break
+                
                 clone(item, item.dataKey, item.payload[item.dataKey] as number)
         }
     })
@@ -117,7 +117,7 @@ export const EvaluationPopup: React.FC = () => {
                     value={getCurEval(item)}
                     key={`${getEvaluationKey(item)}-select`}
                 >
-                    {Object.entries(EVALUATION_OPTIONS).map(([name, value]) =>
+                    {Object.entries(EVALUATION_OPTION_TITLES).map(([name, value]) =>
                         <option value={name} key={`${item.dataKey}-option-${value}`}>{value}</option>
                     )}
                 </EvaluationSelect>
