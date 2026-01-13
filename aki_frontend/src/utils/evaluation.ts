@@ -28,9 +28,9 @@ export const getGraphEvaluator = () => {
   return evaluator
 }
 
-export const getEvaluationKey = (item: GraphPayload) => {
+export const getEvaluationKeyWithDayAndSlot = (item: GraphPayload) => {
   const { payload } = item
-  
+
   let key = ""
 
   if ("day" in payload && payload.day !== null)
@@ -43,3 +43,5 @@ export const getEvaluationKey = (item: GraphPayload) => {
 
   return key
 }
+
+export const getEvaluationKey = (item: GraphPayload) => item.dataKey
