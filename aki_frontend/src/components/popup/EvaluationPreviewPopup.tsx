@@ -51,7 +51,8 @@ const voidFn = () => {
 
 const CREATININE_OPITON_KEYS = {
     'creatinine_value': 'creatinine value',
-    'creatinine_dynamics': 'creatinine dynamics',
+    'creatinine_dynamics_up': 'creatinine dynamics up',
+    'creatinine_dynamics_down': 'creatinine dynamics down',
     'creatinine_fluctuations': 'creatinine fluctuations'
 }
 
