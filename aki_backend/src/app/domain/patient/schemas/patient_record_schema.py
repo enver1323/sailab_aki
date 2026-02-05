@@ -18,6 +18,7 @@ from app.domain.patient.schemas.patient_record_schema_columns import (
     TEST_LONG_RANGE_COLUMNS,
     VITAL_DATA_COLUMNS,
     PRESCRIPTION_COLUMNS,
+    TREATMENT_COLUMNS,
     SURGERY_COLUMNS,
     N_DAYS,
     N_SLOTS,
@@ -29,14 +30,16 @@ class PatientMedicalRecordSchema(ma.SQLAlchemyAutoSchema):
         model = PatientMedicalRecord
 
     def __init__(
-            self,
-            user: User,
-            starred_items_map: Optional[Dict[Tuple[int, int], PatientMedicalRecord]] = None,
-            viewed_items_map: Optional[Dict[Tuple[int, int], PatientMedicalRecord]] = None,
+        self,
+        user: User,
+        starred_items_map: Optional[Dict[Tuple[int, int], PatientMedicalRecord]] = None,
+        viewed_items_map: Optional[Dict[Tuple[int, int], PatientMedicalRecord]] = None,
     ):
         super().__init__()
         self.user = user
-        self.starred_items_map = starred_items_map if starred_items_map is not None else {}
+        self.starred_items_map = (
+            starred_items_map if starred_items_map is not None else {}
+        )
         self.viewed_items_map = viewed_items_map if viewed_items_map is not None else {}
 
     id = fields.Integer(dump_only=True)
@@ -84,17 +87,18 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
     vital_data = fields.Method("get_vital_data")
     prob_data = fields.Method("get_prob_data")
     prescription_data = fields.Method("get_prescription_data")
+    treatment_data = fields.Method("get_treatment_data")
     surgical_data = fields.Method("get_surgical_data")
 
     def _default_daily_data_formatter(
-            self,
-            day: int,
-            slot: int,
-            columns: List[str],
-            data: dict,
-            top_explanations: Dict[str, Dict[str, str]],
-            slot_data: dict,
-            **kwargs,
+        self,
+        day: int,
+        slot: int,
+        columns: List[str],
+        data: dict,
+        top_explanations: Dict[str, Dict[str, str]],
+        slot_data: dict,
+        **kwargs,
     ):
         for col in columns:
             value = data.get(f"d{day}_{slot}_{col}", None)
@@ -109,12 +113,12 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         return slot_data
 
     def _format_daily_data(
-            self,
-            record: PatientMedicalRecord,
-            columns: List[str],
-            top_explanations: Dict[str, Dict[str, str]],
-            callback: Optional[callable] = None,
-            **kwargs,
+        self,
+        record: PatientMedicalRecord,
+        columns: List[str],
+        top_explanations: Dict[str, Dict[str, str]],
+        callback: Optional[callable] = None,
+        **kwargs,
     ):
         data: dict = record.data
 
@@ -135,6 +139,21 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
                 formatted.append(slot_data)
 
         return formatted
+    
+    def _get_gt_list_by_slots(self, data: dict) -> str:
+        aki_data = ""
+        for day in range(N_DAYS):
+            for slot in range(N_SLOTS):
+                aki_datum = data.get(f"d{day}_{slot}_aki", None)
+                match(aki_datum):
+                    case None:
+                        aki_data += ' '
+                    case 0:
+                        aki_data += '-'
+                    case 1:
+                        aki_data += '+'
+        return aki_data
+
 
     def get_general_data(self, record: PatientMedicalRecord, **kwargs):
         if record.data is None:
@@ -142,7 +161,10 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
 
         data = record.data or {}
 
-        return {col: data.get(col, None) for col in GENERAL_DATA_COLUMNS}
+        general_data = {col: data.get(col, None) for col in GENERAL_DATA_COLUMNS}
+        aki_data = self._get_gt_list_by_slots(data)
+
+        return {"aki": aki_data, **general_data}
 
     def get_binary_data(self, record: PatientMedicalRecord, **kwargs):
         if record.data is None:
@@ -162,14 +184,14 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         ]
 
     def _test_data_formatter(
-            self,
-            day: int,
-            slot: int,
-            columns: List[str],
-            data: dict,
-            top_explanations: Dict[str, Dict[str, str]],
-            slot_data: dict,
-            **kwargs,
+        self,
+        day: int,
+        slot: int,
+        columns: List[str],
+        data: dict,
+        top_explanations: Dict[str, Dict[str, str]],
+        slot_data: dict,
+        **kwargs,
     ):
         for col in columns:
             value = data.get(f"d{day}_{slot}_{col}_avg", None)
@@ -193,18 +215,22 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
 
         return self._format_daily_data(
             record,
-            {**TEST_SMALL_RANGE_COLUMNS, **TEST_MID_RANGE_COLUMNS, **TEST_LONG_RANGE_COLUMNS},
+            {
+                **TEST_SMALL_RANGE_COLUMNS,
+                **TEST_MID_RANGE_COLUMNS,
+                **TEST_LONG_RANGE_COLUMNS,
+            },
             top_explanations,
             callback=self._test_data_formatter,
         )
 
     def _format_vital_data(
-            self,
-            record: PatientMedicalRecord,
-            name: str,
-            column: str,
-            area_columns: Tuple[str, str],
-            top_explanations: Dict[str, Dict[str, str]],
+        self,
+        record: PatientMedicalRecord,
+        name: str,
+        column: str,
+        area_columns: Tuple[str, str],
+        top_explanations: Dict[str, Dict[str, str]],
     ):
         data: dict = record.data
 
@@ -280,12 +306,12 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         if src_pred is not None:
             for day, value in src_pred.items():
                 day = int(day) - 1
-                predictions[day * 3: (day + 1) * 3] = [value] * 3
+                predictions[day * 3 : (day + 1) * 3] = [value] * 3
                 predictions_daily[day * 3] = value
 
             for day, value in src_thresh.items():
                 day = int(day) - 1
-                thresholds[day * 3: (day + 1) * 3] = [value] * 3
+                thresholds[day * 3 : (day + 1) * 3] = [value] * 3
 
             # Backward fill
             for i in range(1, n_entries):
@@ -309,14 +335,14 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         ]
 
     def _prescription_data_formatter(
-            self,
-            day: int,
-            slot: int,
-            columns: List[str],
-            data: dict,
-            top_explanations: Dict[str, Dict[str, str]],
-            slot_data: dict,
-            **kwargs,
+        self,
+        day: int,
+        slot: int,
+        columns: List[str],
+        data: dict,
+        top_explanations: Dict[str, Dict[str, str]],
+        slot_data: dict,
+        **kwargs,
     ):
         for col in columns:
             value = data.get(f"d{day}_{slot}_{col}", None)
@@ -331,10 +357,10 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         return slot_data
 
     def _format_prescription_past_months_data(
-            self,
-            record: PatientMedicalRecord,
-            columns: List[str],
-            top_explanations: Dict[str, Dict[str, str]],
+        self,
+        record: PatientMedicalRecord,
+        columns: List[str],
+        top_explanations: Dict[str, Dict[str, str]],
     ):
         data: dict = record.data
 
@@ -361,6 +387,20 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         return self._format_daily_data(
             record,
             PRESCRIPTION_COLUMNS,
+            top_explanations,
+            self._prescription_data_formatter,
+        )
+
+    def get_treatment_data(self, record: PatientMedicalRecord, **kwargs):
+        if record.data is None:
+            return None
+
+        top_explanations = record.get_top_explanations_by_day(self.LIMIT)
+        top_explanations = top_explanations if top_explanations is not None else {}
+
+        return self._format_daily_data(
+            record,
+            TREATMENT_COLUMNS,
             top_explanations,
             self._prescription_data_formatter,
         )
@@ -402,7 +442,7 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
             value = logit / threshold * self.TARGET_THRESHOLD
         else:
             value = threshold + (
-                    (logit - threshold) / (1 - threshold) * (1 - self.TARGET_THRESHOLD)
+                (logit - threshold) / (1 - threshold) * (1 - self.TARGET_THRESHOLD)
             )
         return {APIItems.VALUE.value: value, APIItems.THRESHOLD.value: threshold}
 

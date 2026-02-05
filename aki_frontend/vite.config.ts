@@ -12,6 +12,6 @@ export default ({ mode }) => {
     server: {
       port: parseInt(process.env.VITE_FRONTEND_PORT || 3000),
     },
-    base: "/static/dist"
+    // base: "/static/dist"
   });
 };

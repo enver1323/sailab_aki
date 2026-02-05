@@ -22,8 +22,8 @@ const GridItem: React.FC<React.PropsWithChildren> = ({ children }) => (
 
 const COLLECTIONS = {
   "작은 범위": ["albumin", "bilirubin", "creatinine", "potassium"],
-  "중간 범위": ["alt", "ast", "bun", "calcium", "co2", "hb", "wbc"],
-  "큰 범위": ["chloride", "glucose", "plt", "sodium"],
+  "중간 범위": ["crp", "hematocrit", "bun", "calcium", "co2", "hb", "wbc"],
+  "큰 범위": ["chloride", "glucose", "plt", "sodium", "phosphorus"],
 };
 
 export const PatientRangeData: React.FC<{ data: ITimeSeriesData["test_data"] }> = ({ data }) => {

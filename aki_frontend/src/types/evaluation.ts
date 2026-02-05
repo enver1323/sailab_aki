@@ -18,6 +18,7 @@ export type GraphPayload = {
     name: string,
     dataKey: string,
     payload: { [key: string]: number | null | Array<number> | string },
+    activePayload: Array<{name: string}>,
     color: string,
 }
 
@@ -59,3 +60,10 @@ export const EVALUATION_OPTION_TITLES = {
 export type EvaluationFormPayload = {
     [key: string]: number
 } | null
+
+export const CREATININE_OPITON_KEYS = {
+    'creatinine_value': 'creatinine value',
+    'creatinine_dynamics_up': 'creatinine dynamics up',
+    'creatinine_dynamics_down': 'creatinine dynamics down',
+    'creatinine_fluctuations': 'creatinine fluctuations'
+}

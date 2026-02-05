@@ -17,7 +17,8 @@ np.random.seed(random_seed)
 def preprocess_file(
     filepath: str, department_ids: List[str]
 ) -> DataFrame:
-    data = pd.read_csv(filepath, encoding='euc-kr')  # encoding='CP949'
+    # data = pd.read_csv(filepath, encoding='euc-kr')  # encoding='CP949'
+    data = pd.read_csv(filepath)
 
     print("Original Data Length: ", len(data))
     data = data.dropna(how="any", subset=static_e).reset_index(drop=True)
@@ -48,6 +49,6 @@ def preprocess_file(
     data.reset_index(drop=True, inplace=True)
     print("Preprocressed len: ", len(data))
 
-    data["p_id"] = data["p_id"].astype(int).astype(str)
+    data["p_id"] = data["p_id"].astype(str)
 
     return data

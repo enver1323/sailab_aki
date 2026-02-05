@@ -1,8 +1,7 @@
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react";
 import styled from "styled-components";
 import LayoutPopup from "./LayoutPopup";
-import { EVALUATION_OPTION_TITLES, EvaluationOptions, EvaluationType } from "@/types/evaluation";
-import { FaTimes } from "react-icons/fa";
+import { EVALUATION_OPTION_TITLES, EvaluationOptions, EvaluationType, CREATININE_OPITON_KEYS } from "@/types/evaluation";
 
 interface IEvaluationPreviewModalProps {
     isOpen: boolean;
@@ -49,13 +48,6 @@ const voidFn = () => {
     return;
 };
 
-const CREATININE_OPITON_KEYS = {
-    'creatinine_value': 'creatinine value',
-    'creatinine_dynamics_up': 'creatinine dynamics up',
-    'creatinine_dynamics_down': 'creatinine dynamics down',
-    'creatinine_fluctuations': 'creatinine fluctuations'
-}
-
 
 const CreatinineEvaluationRow: React.FC<ICreatinineEvaluationRowProps> = ({ evaluation, onChange }) => {
     const evalCreatKeys = Object.entries(evaluation ?? {}).filter(([k, _]) => k in CREATININE_OPITON_KEYS)
@@ -97,7 +89,7 @@ const CreatinineEvaluationRow: React.FC<ICreatinineEvaluationRowProps> = ({ eval
     return <>
         <EvaluationRow>
             <strong key="creatinine-eval-key">creatinine</strong>
-            <select value={creatImportanceVal} onChange={updateCreatinine}>
+            <select value={creatImportanceVal} onChange={updateCreatinine} title="Creatinine Importance">
                 {creatImportanceOptions.map((option) =>
                     <option value={option} key={`creatinine-eval-select-option-${option}`}>{EVALUATION_OPTION_TITLES[option]}</option>
                 )}
@@ -105,13 +97,13 @@ const CreatinineEvaluationRow: React.FC<ICreatinineEvaluationRowProps> = ({ eval
         </EvaluationRow>
         {isCreatImportant ?
             <EvaluationRow>
-                <select value={key} onChange={onKeyChange}>
+                <select value={key} onChange={onKeyChange} title="Creatinine type">
                     <option value={undefined}>Not Selected</option>
                     {Object.entries(CREATININE_OPITON_KEYS).map(([option, title]) =>
                         <option value={option} key={`creatinine-${option}-eval-select-option-key`}>{title}</option>
                     )}
                 </select>
-                <select value={val} onChange={onValChange}>
+                <select value={val} onChange={onValChange} title="Creatinine type importance">
                     {Object.entries(EVALUATION_OPTION_TITLES).map(([evalKey, evalValue]) =>
                         <option value={evalKey} key={`creatinine-eval-select-option-value-${evalKey}`}>{evalValue}</option>
                     )}

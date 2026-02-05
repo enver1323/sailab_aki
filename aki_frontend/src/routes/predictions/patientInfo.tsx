@@ -35,15 +35,15 @@ const PatientInfo = () => {
     <DefaultLayout currentPage={"predictions"} subPage={"dashboard"}>
       <PageCard>
         <AsyncBoundary isLoading={data === undefined || isLoading} isError={isError}>
-          {(data?.prob_data || data?.prediction) && (
-            <>
-              <SectionTitle>예측 그래프</SectionTitle>
-              {data?.prob_data && <PatientPredictionData data={data.prob_data} />}
-              <Spacer height={30} />
-            </>
-          )}
           <EvaluationProvider patientMedicalRecordId={recordID}>
             <EvaluationPopup />
+            {(data?.prob_data || data?.prediction) && (
+              <>
+                <SectionTitle>Creatinine 그래프</SectionTitle>
+                {data?.prob_data && <PatientPredictionData data={data.prob_data} />}
+                <Spacer height={30} />
+              </>
+            )}
             {data?.general_data && (
               <>
                 <SectionTitle>기본 정보</SectionTitle>
@@ -77,7 +77,8 @@ const PatientInfo = () => {
                 <SectionTitle>약품 처방 및 수술 데이터</SectionTitle>
                 <PrescriptionSurgicalRow>
                   <PrescriptionGraph data={data.prescription_data!} />
-                  <SurgeryTimeGraph data={data.surgical_data} />
+                  <PrescriptionGraph data={data.treatment_data!} />
+                  {/* <SurgeryTimeGraph data={data.surgical_data} /> */}
                 </PrescriptionSurgicalRow>
               </>
             )}

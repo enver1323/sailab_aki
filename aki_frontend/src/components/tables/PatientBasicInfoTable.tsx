@@ -130,6 +130,10 @@ const getColumns = (evaluationHandler: (payload: any, event: GraphClickSynthetic
         </CellText>
       ),
     }),
+    columnHelper.accessor("aki", {
+      header: "aki",
+      cell: (val) => <CellText onClick={(event: GraphClickSyntheticEvent) => handleClick(val, event)}>{val.getValue()}</CellText>,
+    }),
   ]
   return columns
 };

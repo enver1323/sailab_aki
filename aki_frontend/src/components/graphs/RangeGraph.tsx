@@ -14,6 +14,8 @@ import { StarDot } from "@/components/graphs/atomic/LRPStarDot";
 import { RangeEntry } from "@/types/patientDetails";
 import { DateTooltip } from "@/components/utils/GraphTooltip";
 import { getGraphEvaluator } from "@/utils/evaluation"
+import { GraphClickSyntheticEvent, GraphPayload } from "@/types/evaluation"
+
 
 type PredictionGraphProps = {
   data: Array<RangeEntry>;
@@ -32,7 +34,12 @@ const RangeGraph: React.FC<PredictionGraphProps> = ({ data }) => {
     else dataColumns.push(k);
   }
 
-  const clickHandler = getGraphEvaluator()
+  const graphEvaluatior = getGraphEvaluator()
+
+  const clickHandler = (payload: any, event: GraphClickSyntheticEvent) => {
+    payload.activePayload = (payload.activePayload || []).filter((item: {name: string}) => item.name !== 'creatinine')
+    graphEvaluatior(payload, event)
+  }
 
   return (
     <ResponsiveContainer width="100%" height={height}>

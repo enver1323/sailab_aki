@@ -51,6 +51,7 @@ export type PatientMetaData = {
   stay_length: number;
   admin_room: string;
   date_discharge: Date | null;
+  aki: string;
 };
 
 export type RangeEntry = {
@@ -64,6 +65,11 @@ export type VitalDataEntry = {
 } & { [key: string]: number | null };
 
 export type PrescriptionDataEntry = {
+  day: number;
+  slot: number;
+} & { [key: string]: string | null };
+
+export type TreatmentDataEntry = {
   day: number;
   slot: number;
 } & { [key: string]: string | null };
@@ -84,6 +90,7 @@ export interface ITimeSeriesData {
   vital_data: { [key: string]: Array<VitalDataEntry> };
   prob_data: Array<TimeSeriesEntry>;
   prescription_data: Array<PrescriptionDataEntry>;
+  treatment_data: Array<TreatmentDataEntry>;
   surgical_data: Array<SurgicalDataEntry>;
 }
 

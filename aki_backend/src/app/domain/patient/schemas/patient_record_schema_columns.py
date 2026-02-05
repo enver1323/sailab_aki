@@ -44,8 +44,8 @@ TEST_SMALL_RANGE_COLUMNS = {
     "potassium": "potassium_avg",
 }
 TEST_MID_RANGE_COLUMNS = {
-    "alt": "alt_avg",
-    "ast": "ast_avg",
+    "crp": "crp_avg",
+    "hematocrit": "hematocrit_avg",
     "bun": "bun_avg",
     "calcium": "calcium_avg",
     "co2": "co2_avg",
@@ -57,6 +57,7 @@ TEST_LONG_RANGE_COLUMNS = {
     "glucose": "glucose_avg",
     "plt": "plt_avg",
     "sodium": "sodium_avg",
+    "phosphorus": "phosphorus_avg",
 }
 
 VITAL_DATA_COLUMNS = ("sbp", "dbp", "bt", "pr")
@@ -84,6 +85,19 @@ PRESCRIPTION_COLUMNS = (
     "aminoglycoside",
     "acyclovir",
     "acei",
+)
+
+TREATMENT_COLUMNS = (
+    "rbc",
+    "contrast",
+    "dialysis",
+    "antibiotic_j01a",
+    "antibiotic_j01c",
+    "antibiotic_j01d",
+    "antibiotic_j01e",
+    "antibiotic_j01f",
+    "antibiotic_j01m",
+    "antibiotic_j01x",
 )
 
 SURGERY_COLUMNS = [

@@ -14,6 +14,8 @@ import {
 import { ITimeSeriesData, TimeSeriesEntry } from "@/types/patientDetails";
 import { getDayKey } from "@/components/utils/graphUtils"
 import { DateTooltip } from "@/components//utils/GraphTooltip";
+import { getGraphEvaluator } from "@/utils/evaluation";
+import { GraphClickSyntheticEvent, CREATININE_OPITON_KEYS } from "@/types/evaluation";
 
 type TickType =
   | SVGProps<SVGTextElement>
@@ -108,13 +110,33 @@ const PredictionGraph: React.FC<PredictionGraphProps> = ({ data, selectedDay, se
   const predictionSteps = getPredictionSteps(data);
   const todaySegment = getTodaySegment(data)
 
-  const onChartClick = ({ activePayload }: any) => {
-    if (!activePayload || activePayload.length === 0) return
-    setSelectedDay(n => activePayload[0].payload.day)
-  };
-  const onChartDoubleClick = (e: any) => {
-    setSelectedDay(n => null)
-  };
+  // const onChartClick = ({ activePayload }: any) => {
+  //   if (!activePayload || activePayload.length === 0) return
+  //   setSelectedDay(n => activePayload[0].payload.day)
+  // };
+  // const onChartDoubleClick = (e: any) => {
+  // setSelectedDay(n => null)
+  // };
+
+  const graphEvaluator = getGraphEvaluator()
+  const onChartClick = (payload: any, event: GraphClickSyntheticEvent) => {
+    if (payload.activePayload.length === 0 && !payload.creatinine) {
+      return
+    }
+    const { activePayload } = payload
+    const creatinineActivePayload = activePayload.filter((item: { name: string }) => item.name === 'creatinine')[0]
+    const dataPayload = creatinineActivePayload.payload
+    Object.keys(CREATININE_OPITON_KEYS).every((k) => { dataPayload[k] = dataPayload.creatinine })
+
+    const formattedPayload = {
+      ...payload,
+      activePayload: activePayload
+        .filter((item: { name: string }) => item.name !== 'creatinine')
+        .concat(Object.keys(CREATININE_OPITON_KEYS).map((k) => ({ ...creatinineActivePayload, name: k, dataKey: k })))
+    }
+
+    graphEvaluator(formattedPayload, event)
+  }
 
 
   return (
@@ -125,32 +147,33 @@ const PredictionGraph: React.FC<PredictionGraphProps> = ({ data, selectedDay, se
           x: getDayKey(item),
         }))}
         onClick={onChartClick}
-        onDoubleClick={onChartDoubleClick}
+      // onClick={onChartClick}
+      // onDoubleClick={onChartDoubleClick}
       >
         <XAxis dataKey="x" angle={-45} tick={XAxisTick} />
-        <YAxis yAxisId="probability" domain={[0, 1]} style={{ fontSize: 15 }} tickCount={6}>
-          <Label
+        {/* <YAxis yAxisId="probability" domain={[0, 1]} style={{ fontSize: 15 }} tickCount={6}> */}
+        {/* <Label
             angle={-90}
             value="Probability"
             position="insideLeft"
             style={{ textAnchor: "middle" }}
           />
-        </YAxis>
+        </YAxis> */}
         <YAxis
           yAxisId="creatinine"
-          orientation="right"
+          // orientation="right"
           tickCount={9}
           domain={[0, 4]}
           style={{ fontSize: 15 }}
         >
           <Label
-            angle={90}
+            angle={-90}
             value="Creatinine"
-            position="insideRight"
+            position="insideLeft"
             style={{ textAnchor: "middle" }}
           />
         </YAxis>
-        <Line
+        {/* <Line
           yAxisId="probability"
           dataKey="probability"
           name="예측 발생 확률"
@@ -169,11 +192,11 @@ const PredictionGraph: React.FC<PredictionGraphProps> = ({ data, selectedDay, se
           strokeWidth={1}
           stroke="red"
           strokeDasharray="3 3"
-        />
+        /> */}
         <Line
           yAxisId="creatinine"
           dataKey="creatinine"
-          name="creatinine 수치"
+          name="creatinine"
           type="linear"
           dot={false}
           fill="#fffe00"
