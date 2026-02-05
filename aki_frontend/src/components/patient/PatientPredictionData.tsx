@@ -24,7 +24,7 @@ export const PatientPredictionData: React.FC<{ data: ITimeSeriesData['prob_data'
 
     return <>
         {data && <PredictionGraph data={data} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />}
-        <Spacer height={20} />
-        {data && <PatientLevelData value={normalizedValue} threshold={threshold} />}
+        {/* <Spacer height={20} /> */}
+        {/* {data && <PatientLevelData value={normalizedValue} threshold={threshold} />} */}
     </>
 }

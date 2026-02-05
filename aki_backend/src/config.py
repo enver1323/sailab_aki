@@ -40,7 +40,8 @@ class Config:
     PROPAGATE_EXCEPTIONS = True
     JWT_BLACKLIST_ENABLED = True  # enable blacklist feature
     JWT_BLACKLIST_TOKEN_CHECKS = ("access", "refresh")
-
+    
     MESSAGES_DIR = os.path.join(APP_DIR, 'static/messages')
     UPLOAD_PATH = "static/uploads"
+    EVALUATIONS_UPLOAD_PATH = os.path.join(UPLOAD_PATH, 'evaluations')
     

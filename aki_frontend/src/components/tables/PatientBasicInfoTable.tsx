@@ -110,6 +110,10 @@ const getColumns = (evaluationHandler: (payload: any, event: GraphClickSynthetic
       header: "BMI",
       cell: (val) => <CellText onClick={(event: GraphClickSyntheticEvent) => handleClick(val, event)}>{val.getValue()}</CellText>,
     }),
+    columnHelper.accessor("b_egfr", {
+      header: "EGFR",
+      cell: (val) => <CellText onClick={(event: GraphClickSyntheticEvent) => handleClick(val, event)}>{val.getValue()}</CellText>,
+    }),
     columnHelper.accessor("b_cr", {
       header: "기저 크레아티닌",
       cell: (val) => <CellText onClick={(event: GraphClickSyntheticEvent) => handleClick(val, event)}>{val.getValue()}</CellText>,

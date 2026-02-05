@@ -44,6 +44,7 @@ export type PatientMetaData = {
   age: number;
   sex: number;
   bmi: number;
+  b_egfr: number;
   icu: number;
   b_cr: number;
   department: string;

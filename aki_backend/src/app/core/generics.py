@@ -60,6 +60,10 @@ class Entity(db.Model):
             return bool(query.count())
 
         return False
+    
+    def to_dict(self) -> dict:
+        return {field.name: getattr(self, field.name) for field in self.__table__.columns}
+
 
 
 class Query(BaseQuery):

@@ -6,6 +6,7 @@ GENERAL_DATA_COLUMNS = (
     "age",
     "sex",
     "bmi",
+    "b_egfr",
     "icu",
     "b_cr",
     "department",
