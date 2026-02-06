@@ -2,7 +2,6 @@ import { useEvaluation } from "@/hooks/useEvaluation"
 import { EVALUATION_OPTION_TITLES, EvaluationPayload, GraphPayload } from "@/types/evaluation"
 import { getEvaluationKey } from "@/utils/evaluation"
 import { ChangeEvent, useEffect, useRef } from "react"
-import _, { fromPairs } from 'lodash';
 import styled from "styled-components"
 
 const EvaluationCard = styled.div<{ x: number, y: number }>`
@@ -35,7 +34,7 @@ const formatPayload = (payload: EvaluationPayload) => {
     const formattedData: { [key: string]: number | string | null } = {}
 
     const clone = (item: GraphPayload, cloneKey: string, cloneValue: number | string | null) => {
-        formattedPayload.push({ color: item.color, dataKey: cloneKey, name: cloneKey, payload: formattedData })
+        formattedPayload.push({ color: item.color, dataKey: cloneKey, name: cloneKey, payload: formattedData } as GraphPayload)
         formattedData[cloneKey] = cloneValue
     }
 

@@ -5,8 +5,8 @@ import { getUserFromLocalStorage, useAuth } from "./useAuth";
 import { User } from "@/types/user";
 import { UserResponse } from "@/types/responses";
 
-// const HOME = "/api";
-const HOME = "http://localhost:9000/api";
+const HOME = "/api";
+// const HOME = "http://localhost:9000/api";
 
 const getContextObject = (apiInstance: AxiosInstance = axios) => ({
   get: (route: string, config: AxiosRequestConfig = {}) => apiInstance.get(route, config),
