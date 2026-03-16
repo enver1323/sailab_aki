@@ -48,7 +48,7 @@ const makeMapper = (data: (string | number)[]) =>
   Object.fromEntries(data.map((datum, i) => [datum, i]));
 
 const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }> = ({ data }) => {
-  const height = 360;
+  const height = 460;
 
   const allDataKeys = data.length > 0 ? Object.keys(data[0]) : [];
   const dataColumns: string[] = [];
@@ -102,14 +102,15 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ScatterChart onClick={clickHandler}>
+      <ScatterChart onClick={clickHandler} >
         <CartesianGrid />
         <YAxis
-          fontSize={10}
+          fontSize={14}
           type="number"
           dataKey="y"
           ticks={Object.values(dataColumnsMapper)}
           tickFormatter={(val, _) => dataColumns[val]}
+          width={125}
         />
         <XAxis
           fontSize={14}
