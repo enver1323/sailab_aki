@@ -6,7 +6,8 @@ import { User } from "@/types/user";
 import { UserResponse } from "@/types/responses";
 
 // const HOME = "/api"; // FOR BUILD ONLY
-const HOME = "http://localhost:9000/api"; // FOR DEV ONLY
+// const HOME = "http://localhost:9000/api"; // FOR DEV ONLY
+const HOME = "http://localhost:8999/api"; // FOR ARTYOM ONLY
 
 const getContextObject = (apiInstance: AxiosInstance = axios) => ({
   get: (route: string, config: AxiosRequestConfig = {}) => apiInstance.get(route, config),
