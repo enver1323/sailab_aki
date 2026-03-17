@@ -36,6 +36,7 @@ export type TimeSeriesEntry = {
   probability: number;
   threshold: number;
   probability_daily?: number | null;
+  ground_truth?: string;
   slot: number;
 };
 

@@ -26,6 +26,7 @@ class APIItems(Enum):
     PROBABILITY_CRITICAL = "probability_critical"
     PROBABILITY_DAILY = "probability_daily"
     THRESHOLD = "threshold"
+    GROUND_TRUTH = "ground_truth"
     FIELD = "field"
     VALUE = "value"
     LRP_VALUE = "lrp_value"

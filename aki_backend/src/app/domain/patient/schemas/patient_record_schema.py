@@ -140,18 +140,17 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
 
         return formatted
     
+    def _get_gt_symbol(self, value) -> str:
+        if value in (1, 1.0, "1", True):
+            return "+"
+        return "-"
+
     def _get_gt_list_by_slots(self, data: dict) -> str:
         aki_data = ""
         for day in range(N_DAYS):
             for slot in range(N_SLOTS):
-                aki_datum = data.get(f"d{day}_{slot}_aki", None)
-                match(aki_datum):
-                    case None:
-                        aki_data += ' '
-                    case 0:
-                        aki_data += '-'
-                    case 1:
-                        aki_data += '+'
+                aki_datum = data.get(f"d{day + 1}_{slot + 1}_aki", None)
+                aki_data += self._get_gt_symbol(aki_datum)
         return aki_data
 
 
@@ -330,6 +329,9 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
                 APIItems.PROBABILITY.value: predictions[i],
                 APIItems.PROBABILITY_DAILY.value: predictions_daily[i],
                 APIItems.THRESHOLD.value: thresholds[i],
+                APIItems.GROUND_TRUTH.value: self._get_gt_symbol(
+                    data.get(f"d{(i // 3) + 1}_{(i % 3) + 1}_aki", None)
+                ),
             }
             for i in range(len(creatinine_vals))
         ]
