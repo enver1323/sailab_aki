@@ -21,28 +21,28 @@ import { getGraphEvaluator } from "@/utils/evaluation";
 import { GraphClickSyntheticEvent } from "@/types/evaluation";
 
 const ANTIBIOTIC_CODE_DESCRIPTIONS: Record<string, string> = {
-  antibiotic_j01a: 'j01a Tetracyclines. \
+  antibiotic_j01a: 'j01a: Tetracyclines. \
 This group comprises tetracycline antibacterials inhibiting the bacterial protein synthesis \
 through binding to the 30-S part of ribosomes.',
 
-  antibiotic_j01c: 'j01c Beta-Lactam Antibacterials, Penicillins. \
+  antibiotic_j01c: 'j01c: Beta-Lactam Antibacterials, Penicillins. \
 This group comprises penicillin beta-lactam antibacterials, inhibiting the bacterial cell \
 wall synthesis.',
 
-  antibiotic_j01d: 'j01d Other Beta-Lactam Antibacterials. \
+  antibiotic_j01d: 'j01d: Other Beta-Lactam Antibacterials. \
 This group comprises beta-lactam antibacterials, other than penicillins',
 
-  antibiotic_j01e: 'j01e Sulfonamides and Trimethoprim. \
+  antibiotic_j01e: 'j01e: Sulfonamides and Trimethoprim. \
 This group comprises systemic sulfonamide and trimethoprim preparations.',
 
-  antibiotic_j01f: 'j01f Macrolides, Lincosamides and Streptogramins. \
+  antibiotic_j01f: 'j01f: Macrolides, Lincosamides and Streptogramins. \
 This group comprises macrolide, lincosamide and streptogramin antibacterials inhibiting \
 bacterial protein synthesis through binding to the 50-S part of the ribosomes.',
 
-  antibiotic_j01m: 'j01m Quinolone Antibacterials. \
+  antibiotic_j01m: 'j01m: Quinolone Antibacterials. \
 This group comprises quinolone antibacterials, inhibiting the bacterial DNA-gyrase.',
 
-  antibiotic_j01x: 'j01x Other Antibacterials. \
+  antibiotic_j01x: 'j01x: Other Antibacterials. \
 This group comprises antibacterials with various modes of action not classified in the \
 preceding groups.',
 };
