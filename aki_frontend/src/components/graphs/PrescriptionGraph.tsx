@@ -20,7 +20,13 @@ import React from "react";
 import { getGraphEvaluator } from "@/utils/evaluation";
 import { GraphClickSyntheticEvent } from "@/types/evaluation";
 
-const ANTIBIOTIC_CODE_DESCRIPTIONS: Record<string, string> = {
+const ITEM_CODE_DESCRIPTIONS: Record<string, string> = {
+  dialysis: "Dialysis is a treatment that filters blood to remove wastes, extra salt, and water when the kidneys cannot do this adequately.",
+
+  contrast: "Contrast material is used in imaging (such as CT, MRI, and X-ray) to make organs, vessels, or tissues more visible for diagnosis.",
+
+  rbc: "RBC indicates red blood cells (typically red blood cell transfusion in treatment context), used to replace blood loss and support oxygen delivery.",
+
   antibiotic_j01a: 'j01a: Tetracyclines. \
 This group comprises tetracycline antibacterials inhibiting the bacterial protein synthesis \
 through binding to the 30-S part of ribosomes.',
@@ -74,8 +80,16 @@ const formatScatterData = (columns: Array<string>, data: ITimeSeriesData["prescr
 const makeMapper = (data: (string | number)[]) =>
   Object.fromEntries(data.map((datum, i) => [datum, i]));
 
+type AntibioticTooltip = {
+  text: string;
+  x: number;
+  y: number;
+} | null;
+
 const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }> = ({ data }) => {
-  const height = 460;
+  const ROW_HEIGHT_PX = 46;
+  const X_AXIS_HEIGHT_PX = 32;
+  const CHART_MARGIN = { top: 8, right: 8, bottom: 8, left: 0 };
 
   const allDataKeys = data.length > 0 ? Object.keys(data[0]) : [];
   const dataColumns: string[] = [];
@@ -92,15 +106,40 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
 
   const xTicks = getTicksDomain(maxDay);
   const xTicksMapper = makeMapper(xTicks);
+  const dayTickIndexes = Object.values(xTicksMapper).filter((index) => Number(index) % 3 === 0);
 
   const dataColumnsMapper = makeMapper(dataColumns);
   const filteredDataColumns = dataColumns.filter((col) => scatterData[col].length > 0)
   const strokeWidth = 3
+  const tooltipMaxWidth = 520;
+
+  const wrapperRef = React.useRef<HTMLDivElement | null>(null);
+  const [antibioticTooltip, setAntibioticTooltip] = React.useState<AntibioticTooltip>(null);
+
+  const rowAwareHeight =
+    Math.max(1, dataColumns.length) * ROW_HEIGHT_PX +
+    X_AXIS_HEIGHT_PX +
+    CHART_MARGIN.top +
+    CHART_MARGIN.bottom;
+  const yTicks = Object.values(dataColumnsMapper);
+
+  const updateAntibioticTooltip = (event: any, text: string) => {
+    const wrapperRect = wrapperRef.current?.getBoundingClientRect();
+    if (!wrapperRect) return;
+
+    const targetX = event.clientX - wrapperRect.left + 12;
+    const targetY = event.clientY - wrapperRect.top - 12;
+
+    const x = Math.max(8, Math.min(wrapperRect.width - tooltipMaxWidth - 8, targetX));
+    const y = Math.max(8, targetY);
+
+    setAntibioticTooltip({ text, x, y });
+  };
 
   const YAxisTick = ({ x = 0, y = 0, payload }: any) => {
     const index = Number(payload?.value);
     const label = Number.isFinite(index) ? dataColumns[index] : "";
-    const tooltipText = ANTIBIOTIC_CODE_DESCRIPTIONS[label];
+    const tooltipText = ITEM_CODE_DESCRIPTIONS[label];
 
     return (
       <g transform={`translate(${x},${y})`}>
@@ -112,9 +151,17 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
           fill="#666"
           fontSize={14}
           style={tooltipText ? { cursor: "help" } : undefined}
+          onMouseEnter={(event) => {
+            if (!tooltipText) return;
+            updateAntibioticTooltip(event, tooltipText);
+          }}
+          onMouseMove={(event) => {
+            if (!tooltipText) return;
+            updateAntibioticTooltip(event, tooltipText);
+          }}
+          onMouseLeave={() => setAntibioticTooltip(null)}
         >
           {label}
-          {tooltipText ? <title>{tooltipText}</title> : null}
         </text>
       </g>
     );
@@ -151,45 +198,80 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
   }
 
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <ScatterChart onClick={clickHandler} >
-        <CartesianGrid />
-        <YAxis
-          fontSize={14}
-          type="number"
-          dataKey="y"
-          ticks={Object.values(dataColumnsMapper)}
-          tick={<YAxisTick />}
-          width={125}
-        />
-        <XAxis
-          fontSize={14}
-          type="number"
-          dataKey="x"
-          ticks={Object.values(xTicksMapper)}
-          tickFormatter={(val) => xTicks[val]}
-        />
-        {filteredDataColumns
-          .map((col, id) => (
-            <Scatter
-              name={col}
-              data={scatterData[col].map(({ x, y }) => ({
-                date: x,
-                x: xTicksMapper[x],
-                y: dataColumnsMapper[y],
-              }))}
-              stroke={COLORS[id]}
-              strokeWidth={strokeWidth}
-              key={col}
-              fill={COLORS[id]}
-              shape={
-                <Rectangle width={40} height={10} fill={COLORS[id]} strokeWidth={strokeWidth} />
-              }
-            />
-          ))}
-        <Tooltip contentStyle={{ fontSize: 14 }} content={<DateTooltip />} />
-      </ScatterChart>
-    </ResponsiveContainer>
+    <div ref={wrapperRef} style={{ width: "100%", height: rowAwareHeight, position: "relative" }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <ScatterChart onClick={clickHandler} margin={CHART_MARGIN}>
+          <CartesianGrid />
+          <YAxis
+            fontSize={14}
+            type="number"
+            dataKey="y"
+            interval={0}
+            domain={[-0.5, Math.max(0, dataColumns.length - 0.5)]}
+            allowDataOverflow
+            ticks={yTicks}
+            tick={<YAxisTick />}
+            width={125}
+          />
+          <XAxis
+            fontSize={14}
+            type="number"
+            dataKey="x"
+            ticks={dayTickIndexes}
+            interval={0}
+            domain={[0, Math.max(0, xTicks.length - 1)]}
+            allowDataOverflow
+            height={X_AXIS_HEIGHT_PX}
+            tickFormatter={(val) => {
+              const index = Number(val);
+              return Number.isFinite(index) ? (xTicks[index] ?? "") : "";
+            }}
+          />
+          {filteredDataColumns
+            .map((col, id) => (
+              <Scatter
+                name={col}
+                data={scatterData[col].map(({ x, y }) => ({
+                  date: x,
+                  x: xTicksMapper[x],
+                  y: dataColumnsMapper[y],
+                }))}
+                stroke={COLORS[id]}
+                strokeWidth={strokeWidth}
+                key={col}
+                fill={COLORS[id]}
+                shape={
+                  <Rectangle width={40} height={10} fill={COLORS[id]} strokeWidth={strokeWidth} />
+                }
+              />
+            ))}
+          <Tooltip contentStyle={{ fontSize: 14 }} content={<DateTooltip />} />
+        </ScatterChart>
+      </ResponsiveContainer>
+      {antibioticTooltip ? (
+        <div
+          style={{
+            position: "absolute",
+            left: antibioticTooltip.x,
+            top: antibioticTooltip.y,
+            zIndex: 20,
+            maxWidth: tooltipMaxWidth,
+            padding: "10px 12px",
+            border: "1px solid #333",
+            background: "#fff",
+            color: "#111",
+            fontSize: 15,
+            lineHeight: 1.4,
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.18)",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+            pointerEvents: "none",
+          }}
+        >
+          {antibioticTooltip.text}
+        </div>
+      ) : null}
+    </div>
   );
 };
 
