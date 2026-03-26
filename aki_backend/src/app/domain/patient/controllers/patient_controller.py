@@ -282,7 +282,7 @@ class PatientMedicalRecordEvaluations(Controller):
         user_id = get_jwt_identity()
 
         return cls.response(
-            200, data=cls._get_formatted_records(patient_medical_record_id, user_id)
+            200, data=cls._get_formatted_records(user_id, patient_medical_record_id)
         )
 
     @classmethod
@@ -302,5 +302,5 @@ class PatientMedicalRecordEvaluations(Controller):
         )
 
         return cls.response(
-            200, data=cls._get_formatted_records(patient_medical_record_id, user_id)
+            200, data=cls._get_formatted_records(user_id, patient_medical_record_id)
         )
