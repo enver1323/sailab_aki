@@ -16,6 +16,8 @@ interface ICreatinineEvaluationRowProps {
     onChange: (key: string, value: number) => void
 }
 
+const MAX_IMPORTANT_FEATURES = 10;
+
 const FooterRow = styled.div`
     width: 100%;
     display: flex;
@@ -116,15 +118,25 @@ const CreatinineEvaluationRow: React.FC<ICreatinineEvaluationRowProps> = ({ eval
 
 
 const EvaluationPreviewModal: React.FC<IEvaluationPreviewModalProps> = ({ isOpen, onClose, evaluation, onChange, onSave }) => {
-    const onSaveClick = () => {
-        onSave()
-        onClose()
-    }
     const onEvaluate = (key: string, event: ChangeEvent<HTMLSelectElement>) => {
         onChange(key, parseInt(event.target.value))
     }
 
     const evaluationValues: number[] = Object.entries(evaluation ?? {}).map(([_, v]) => v)
+    const selectedFeatureCount: number = evaluationValues.filter((value) =>
+        value === EvaluationOptions.Important || value === EvaluationOptions.VeryImportant
+    ).length
+
+    const onSaveClick = () => {
+        if (selectedFeatureCount > MAX_IMPORTANT_FEATURES) {
+            window.alert(`Maximum number of Important/Very Important features is ${MAX_IMPORTANT_FEATURES}.`)
+            return
+        }
+
+        onSave()
+        onClose()
+    }
+
     const evaluationStatOptions: EvaluationOptions[] = [EvaluationOptions.VeryImportant, EvaluationOptions.Important]
     const evaluationStats: [EvaluationOptions, number][] = evaluationStatOptions
         .map((option) => [option, evaluationValues.filter((val: number) => val === option).length] as [EvaluationOptions, number])
