@@ -6,6 +6,8 @@ import { useEvaluationShow } from "./queries/useEvaluationData";
 const EvaluationContext = createContext<EvaluationContextType>({
   evaluation: null,
   setEvaluation: () => { },
+  syncEvaluationWithServer: () => { },
+  resetEvaluation: () => { },
   updateEvaluation: (key: string, value: number) => { },
   payload: null,
   setPayload: () => { },
@@ -20,8 +22,23 @@ const EvaluationWrapper = styled.div`
 
 export const EvaluationProvider: React.FC<React.PropsWithChildren & {patientMedicalRecordId: number}> = ({ patientMedicalRecordId, children }) => {
   const [evaluation, setEvaluation] = useState<EvaluationType>(null)
+  const [savedEvaluation, setSavedEvaluation] = useState<EvaluationType>(null)
   const [payload, setPayload] = useState(null)
   const [pos, setPos] = useState({ x: 0, y: 0 })
+
+  const cloneEvaluation = (data: EvaluationType): EvaluationType => {
+    if (data === null) return null
+    return { ...data }
+  }
+
+  const syncEvaluationWithServer = (data: EvaluationType) => {
+    setSavedEvaluation(cloneEvaluation(data))
+    setEvaluation(cloneEvaluation(data))
+  }
+
+  const resetEvaluation = () => {
+    setEvaluation(cloneEvaluation(savedEvaluation))
+  }
 
   const updateEvaluation = (key: string, value: number) => {
     const updatedEvaluation = value !== 0
@@ -33,16 +50,16 @@ export const EvaluationProvider: React.FC<React.PropsWithChildren & {patientMedi
   const { data: evaluations } = useEvaluationShow(patientMedicalRecordId)
 
   useEffect(() => {
-    if (evaluations) {
-      setEvaluation(evaluations)
+    if (evaluations !== undefined) {
+      syncEvaluationWithServer(evaluations)
     }
   }, [evaluations, setEvaluation])
 
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   const value: EvaluationContextType = useMemo(() => (
-    { evaluation, setEvaluation, updateEvaluation, payload, setPayload, pos, setPos, wrapperRef }),
-    [evaluation, payload, pos]
+    { evaluation, setEvaluation, syncEvaluationWithServer, resetEvaluation, updateEvaluation, payload, setPayload, pos, setPos, wrapperRef }),
+    [evaluation, savedEvaluation, payload, pos]
   );
 
   return <EvaluationContext.Provider value={value}>

@@ -27,6 +27,8 @@ export type EvaluationPayload = Array<GraphPayload> | null;
 export type EvaluationContextType = {
     evaluation: EvaluationType,
     setEvaluation: (data: any) => void,
+    syncEvaluationWithServer: (data: EvaluationType) => void,
+    resetEvaluation: () => void,
     updateEvaluation: (key: string, value: number) => void,
     payload: EvaluationPayload,
     setPayload: (data: any) => void,
