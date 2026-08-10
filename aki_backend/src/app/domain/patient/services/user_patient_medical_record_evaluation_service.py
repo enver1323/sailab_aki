@@ -10,6 +10,16 @@ from app.domain.patient.entities.patient import PatientMedicalRecord
 
 
 class UserPatientMedicalRecordEvaluationService:
+    LEGACY_COLUMN_ALIASES = {"baseline_creatinine": "b_cr"}
+
+    @classmethod
+    def normalize_columns(cls, data: Dict[str, int]) -> Dict[str, int]:
+        normalized: Dict[str, int] = {}
+        for column_name, value in data.items():
+            key = cls.LEGACY_COLUMN_ALIASES.get(column_name, column_name)
+            normalized[key] = max(normalized.get(key, value), value)
+        return normalized
+
     @classmethod
     def update(
         cls,
@@ -17,6 +27,7 @@ class UserPatientMedicalRecordEvaluationService:
         patient_medical_record_id: int,
         data: Dict[str, int],
     ):
+        data = cls.normalize_columns(data)
         try:
             (
                 UserPatientMedicalRecordEvaluation.query.where_user_id(user_id)

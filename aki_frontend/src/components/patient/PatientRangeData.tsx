@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useEffect } from "react";
 
-import { ITimeSeriesData } from "@/types/patientDetails";
+import { ITimeSeriesData, ModelWindow } from "@/types/patientDetails";
 import { SectionSubTitle } from "@/routes/predictions/atomic/Titles";
 import RangeGraph from "@/components/graphs/RangeGraph";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -26,7 +26,12 @@ const COLLECTIONS = {
   "큰 범위": ["chloride", "glucose", "plt", "sodium", "phosphorus"],
 };
 
-export const PatientRangeData: React.FC<{ data: ITimeSeriesData["test_data"] }> = ({ data }) => {
+type PatientRangeDataProps = {
+  data: ITimeSeriesData["test_data"];
+  modelWindow?: ModelWindow | null;
+};
+
+export const PatientRangeData: React.FC<PatientRangeDataProps> = ({ data, modelWindow }) => {
   const [dataKeys, setDataKeys] = useLocalStorage("patient.selectedRangeKeys", ["creatinine"]);
   const allDataKeys = data.length > 0 ? Object.keys(data[0]) : [];
   useEffect(() => {
@@ -55,7 +60,7 @@ export const PatientRangeData: React.FC<{ data: ITimeSeriesData["test_data"] }> 
             collections={COLLECTIONS}
           />
         </div>
-        <RangeGraph data={filteredData} />
+        <RangeGraph data={filteredData} modelWindow={modelWindow} />
       </GraphRow>
     </GridItem>
   );

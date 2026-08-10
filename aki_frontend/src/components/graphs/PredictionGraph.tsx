@@ -11,8 +11,8 @@ import {
   Label,
   ResponsiveContainer
 } from "recharts";
-import { ITimeSeriesData, TimeSeriesEntry } from "@/types/patientDetails";
-import { getDayKey } from "@/components/utils/graphUtils"
+import { ITimeSeriesData, ModelWindow, TimeSeriesEntry } from "@/types/patientDetails";
+import { getDayKey, getWindowBands, WINDOW_COLORS } from "@/components/utils/graphUtils"
 import { DateTooltip } from "@/components//utils/GraphTooltip";
 import { getGraphEvaluator } from "@/utils/evaluation";
 import { GraphClickSyntheticEvent, CREATININE_OPITON_KEYS } from "@/types/evaluation";
@@ -96,14 +96,16 @@ type PredictionGraphProps = {
   data: ITimeSeriesData["prob_data"];
   selectedDay: number | null;
   setSelectedDay: Dispatch<SetStateAction<number | null>>;
+  modelWindow?: ModelWindow | null;
 }
 
-const PredictionGraph: React.FC<PredictionGraphProps> = ({ data, selectedDay, setSelectedDay }) => {
+const PredictionGraph: React.FC<PredictionGraphProps> = ({ data, selectedDay, setSelectedDay, modelWindow }) => {
   const height = 480;
 
   if (selectedDay !== null)
     data = data.filter((entry) => entry.day >= selectedDay && entry.day <= selectedDay + 2)
 
+  const windowBands = getWindowBands(modelWindow, getDayKey);
   const alertRegions = getReferenceRegions(data, (datum) => datum.probability > datum.threshold);
   const highlightedRegions = selectedDay ? getReferenceRegions(data, (datum) => datum.day >= selectedDay && datum.day < selectedDay + 2) : [];
 
@@ -173,6 +175,25 @@ const PredictionGraph: React.FC<PredictionGraphProps> = ({ data, selectedDay, se
             style={{ textAnchor: "middle" }}
           />
         </YAxis>
+        {windowBands.map(({ key, x1, x2, fill, label }) => (
+          <ReferenceArea
+            x1={x1}
+            x2={x2}
+            key={`window_${key}`}
+            fill={fill}
+            fillOpacity={0.55}
+            yAxisId="creatinine"
+          >
+            {label ? (
+              <Label
+                value={label}
+                position="center"
+                fill={WINDOW_COLORS.futureText}
+                fontSize={18}
+              />
+            ) : null}
+          </ReferenceArea>
+        ))}
         {/* <Line
           yAxisId="probability"
           dataKey="probability"
@@ -205,7 +226,7 @@ const PredictionGraph: React.FC<PredictionGraphProps> = ({ data, selectedDay, se
         <Line
           yAxisId="creatinine"
           type="linear"
-          dataKey="baseline_creatinine"
+          dataKey="b_cr"
           name={`baseline creatinine`}
           dot={false}
           fill="#FF5555"

@@ -3,15 +3,16 @@ import {
   Legend,
   Line,
   LineChart,
+  ReferenceArea,
   Tooltip,
   XAxis,
   YAxis,
   Label,
   ResponsiveContainer,
 } from "recharts";
-import { COLORS, getDayAxisKey } from "@/components/utils/graphUtils";
+import { COLORS, getDayAxisKey, getWindowBands, WINDOW_COLORS } from "@/components/utils/graphUtils";
 import { StarDot } from "@/components/graphs/atomic/LRPStarDot";
-import { RangeEntry } from "@/types/patientDetails";
+import { ModelWindow, RangeEntry } from "@/types/patientDetails";
 import { DateTooltip } from "@/components/utils/GraphTooltip";
 import { getGraphEvaluator } from "@/utils/evaluation"
 import { GraphClickSyntheticEvent, GraphPayload } from "@/types/evaluation"
@@ -19,10 +20,13 @@ import { GraphClickSyntheticEvent, GraphPayload } from "@/types/evaluation"
 
 type PredictionGraphProps = {
   data: Array<RangeEntry>;
+  modelWindow?: ModelWindow | null;
 };
 
-const RangeGraph: React.FC<PredictionGraphProps> = ({ data }) => {
+const RangeGraph: React.FC<PredictionGraphProps> = ({ data, modelWindow }) => {
   const height = 400;
+
+  const windowBands = getWindowBands(modelWindow, getDayAxisKey);
 
   const allDataKeys = data.length > 0 ? Object.keys(data[0]) : [];
   const dataColumns = [];
@@ -54,6 +58,20 @@ const RangeGraph: React.FC<PredictionGraphProps> = ({ data }) => {
         <XAxis dataKey="tick" tickCount={7}>
           <Label value="입원 후 일수" position="top" style={{ textAnchor: "middle" }} />
         </XAxis>
+        {windowBands.map(({ key, x1, x2, fill, label }) => (
+          <ReferenceArea
+            x1={x1}
+            x2={x2}
+            key={`window_${key}`}
+            fill={fill}
+            fillOpacity={0.55}
+            yAxisId="value"
+          >
+            {label ? (
+              <Label value={label} position="center" fill={WINDOW_COLORS.futureText} fontSize={14} />
+            ) : null}
+          </ReferenceArea>
+        ))}
         {dataColumns.map((col, id) => (
           <Line
             yAxisId="value"

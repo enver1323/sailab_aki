@@ -40,7 +40,7 @@ const PatientInfo = () => {
             {(data?.prob_data || data?.prediction) && (
               <>
                 <SectionTitle>Creatinine 그래프</SectionTitle>
-                {data?.prob_data && <PatientPredictionData data={data.prob_data} />}
+                {data?.prob_data && <PatientPredictionData data={data.prob_data} modelWindow={data.model_window} />}
                 <Spacer height={30} />
               </>
             )}
@@ -61,14 +61,14 @@ const PatientInfo = () => {
             {data?.test_data && (
               <>
                 <SectionTitle>검사 결과</SectionTitle>
-                <PatientRangeData data={data.test_data} />
+                <PatientRangeData data={data.test_data} modelWindow={data.model_window} />
                 <Spacer height={30} />
               </>
             )}
             {data?.vital_data && (
               <>
                 <SectionTitle>검사 결과</SectionTitle>
-                <PatientVitalData data={data.vital_data} />
+                <PatientVitalData data={data.vital_data} modelWindow={data.model_window} />
                 <Spacer height={30} />
               </>
             )}
@@ -76,8 +76,8 @@ const PatientInfo = () => {
               <>
                 <SectionTitle>약품 처방 및 수술 데이터</SectionTitle>
                 <PrescriptionSurgicalRow>
-                  <PrescriptionGraph data={data.prescription_data!} />
-                  <PrescriptionGraph data={data.treatment_data!} />
+                  <PrescriptionGraph data={data.prescription_data!} modelWindow={data.model_window} />
+                  <PrescriptionGraph data={data.treatment_data!} modelWindow={data.model_window} />
                   {/* <SurgeryTimeGraph data={data.surgical_data} /> */}
                 </PrescriptionSurgicalRow>
               </>

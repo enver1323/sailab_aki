@@ -1,8 +1,8 @@
-import { ITimeSeriesData } from "@/types/patientDetails";
+import { ITimeSeriesData, ModelWindow } from "@/types/patientDetails";
 import React, { useEffect } from "react";
 import { getVitalGraph } from "@/components/graphs/VitalGraph";
-import { ComposedChart, Label, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { getDayAxisKey, getDayKey } from "@/components/utils/graphUtils";
+import { ComposedChart, Label, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { getDayAxisKey, getDayKey, getWindowBands, WINDOW_COLORS } from "@/components/utils/graphUtils";
 import { DateTooltip } from "@/components/utils/GraphTooltip";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { DataKeySelector } from "@/components/patient/atomic/DataKeySelector";
@@ -22,8 +22,15 @@ const COLOR_MAP = {
   pr: "red",
 };
 
-export const PatientVitalData: React.FC<{ data: ITimeSeriesData["vital_data"] }> = ({ data }) => {
+type PatientVitalDataProps = {
+  data: ITimeSeriesData["vital_data"];
+  modelWindow?: ModelWindow | null;
+};
+
+export const PatientVitalData: React.FC<PatientVitalDataProps> = ({ data, modelWindow }) => {
   const height = 260;
+
+  const windowBands = getWindowBands(modelWindow, getDayAxisKey);
 
   const allDataKeys = ["sbp", "dbp", "pr", "bt"];
   const [dataKeys, setDataKeys] = useLocalStorage("patient.selectedVitalKeys", [...allDataKeys]);
@@ -66,6 +73,20 @@ export const PatientVitalData: React.FC<{ data: ITimeSeriesData["vital_data"] }>
           <XAxis dataKey="tick" tickCount={7}>
             <Label value="입원 후 일수" position="top" style={{ textAnchor: "middle" }} />
           </XAxis>
+          {windowBands.map(({ key, x1, x2, fill, label }) => (
+            <ReferenceArea
+              x1={x1}
+              x2={x2}
+              key={`window_${key}`}
+              fill={fill}
+              fillOpacity={0.55}
+              yAxisId="value"
+            >
+              {label ? (
+                <Label value={label} position="center" fill={WINDOW_COLORS.futureText} fontSize={14} />
+              ) : null}
+            </ReferenceArea>
+          ))}
           {...Object.entries(filteredData).map(([key, value]) =>
             getVitalGraph({
               data: value,

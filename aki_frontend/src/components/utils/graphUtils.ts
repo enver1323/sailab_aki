@@ -1,3 +1,5 @@
+import { ModelWindow } from "@/types/patientDetails";
+
 export const COLORS = [
   '#0000FF',
   '#8A2BE2',
@@ -163,4 +165,87 @@ export const getTicksDomain = (
     }
   }
   return ticks;
+};
+
+export const WINDOW_COLORS = {
+  input: "#BEE3F4",
+  output: "#FFF200",
+  future: "#E7E7E7",
+  futureText: "#FF0000",
+};
+
+export const WINDOW_LEGEND = [
+  { key: "input", label: "Input-48h", color: WINDOW_COLORS.input },
+  { key: "output", label: "Output-48h", color: WINDOW_COLORS.output },
+  { key: "future", label: "No future data", color: WINDOW_COLORS.future },
+];
+
+export type SlotRegion = "past" | "input" | "output" | "future";
+
+const inRange = (day: number, start: number | null, end: number | null) =>
+  start !== null && end !== null && day >= start && day <= end;
+
+export const getSlotRegion = (day: number, window?: ModelWindow | null): SlotRegion => {
+  if (!window) return "past";
+  if (inRange(day, window.input_start_day, window.input_end_day)) return "input";
+  if (inRange(day, window.output_start_day, window.output_end_day)) return "output";
+  if (day > window.model_input_day) return "future";
+  return "past";
+};
+
+export type WindowBand = {
+  key: string;
+  x1: string;
+  x2: string;
+  fill: string;
+  label?: string;
+};
+
+export const getWindowBands = (
+  window: ModelWindow | null | undefined,
+  formatter: ({ day, slot }: { day: number; slot: number }) => string
+): WindowBand[] => {
+  if (!window) return [];
+
+  const { input_start_day, input_end_day, model_input_day, n_days, n_slots } = window;
+  const bands: WindowBand[] = [
+    {
+      key: "input",
+      x1: formatter({ day: input_start_day, slot: 1 }),
+      x2: formatter({ day: input_end_day, slot: n_slots }),
+      fill: WINDOW_COLORS.input,
+    },
+  ];
+
+  if (model_input_day < n_days) {
+    bands.push({
+      key: "future",
+      x1: formatter({ day: input_end_day, slot: n_slots }),
+      x2: formatter({ day: n_days, slot: n_slots }),
+      fill: WINDOW_COLORS.future,
+      label: "No future data",
+    });
+  }
+
+  return bands;
+};
+
+export type WindowBandIndexes = Omit<WindowBand, "x1" | "x2"> & {
+  x1: number;
+  x2: number;
+};
+
+export const getWindowBandIndexes = (
+  window: ModelWindow | null | undefined
+): WindowBandIndexes[] => {
+  if (!window) return [];
+
+  const toIndex = ({ day, slot }: { day: number; slot: number }) =>
+    (day - 1) * window.n_slots + (slot - 1);
+
+  return getWindowBands(window, (position) => String(toIndex(position))).map((band) => ({
+    ...band,
+    x1: Number(band.x1),
+    x2: Number(band.x2),
+  }));
 };

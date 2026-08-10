@@ -81,6 +81,7 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
     TARGET_THRESHOLD = 0.5
 
     prediction = fields.Method("get_normalized_prediction")
+    model_window = fields.Method("get_model_window")
     general_data = fields.Method("get_general_data")
     binary_data = fields.Method("get_binary_data")
     test_data = fields.Method("get_test_data")
@@ -89,6 +90,62 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
     prescription_data = fields.Method("get_prescription_data")
     treatment_data = fields.Method("get_treatment_data")
     surgical_data = fields.Method("get_surgical_data")
+
+    OUTPUT_DAYS = 2
+    INPUT_DAYS = 2
+
+    def _resolve_model_input_day(
+        self, record: PatientMedicalRecord
+    ) -> Optional[int]:
+        raw = (record.data or {}).get("model_input_day", None)
+
+        day = None
+        if raw is not None and str(raw).strip() != "":
+            try:
+                day = int(float(raw))
+            except (TypeError, ValueError):
+                day = None
+
+        if day is None:
+            day = record.max_predicted_day
+
+        if day is None or day < 1:
+            return None
+
+        return min(day, N_DAYS)
+
+    def _is_future(self, day: int, max_day: Optional[int]) -> bool:
+        return max_day is not None and day > max_day
+
+    def _max_ground_truth_day(self, record: PatientMedicalRecord) -> Optional[int]:
+        model_input_day = self._resolve_model_input_day(record)
+        if model_input_day is None:
+            return None
+        return model_input_day + self.OUTPUT_DAYS
+
+    def get_model_window(self, record: PatientMedicalRecord, **kwargs):
+        model_input_day = self._resolve_model_input_day(record)
+        if model_input_day is None:
+            return None
+
+        output_start_day = model_input_day + 1
+        output_end_day = model_input_day + self.OUTPUT_DAYS
+
+        return {
+            APIItems.MODEL_INPUT_DAY.value: model_input_day,
+            APIItems.INPUT_START_DAY.value: max(
+                1, model_input_day - (self.INPUT_DAYS - 1)
+            ),
+            APIItems.INPUT_END_DAY.value: model_input_day,
+            APIItems.OUTPUT_START_DAY.value: (
+                output_start_day if output_start_day <= N_DAYS else None
+            ),
+            APIItems.OUTPUT_END_DAY.value: (
+                min(N_DAYS, output_end_day) if output_start_day <= N_DAYS else None
+            ),
+            APIItems.N_DAYS.value: N_DAYS,
+            APIItems.N_SLOTS.value: N_SLOTS,
+        }
 
     def _default_daily_data_formatter(
         self,
@@ -101,9 +158,9 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         **kwargs,
     ):
         for col in columns:
-            value = data.get(f"d{day}_{slot}_{col}", None)
+            value = data.get(f"d{day + 1}_{slot + 1}_{col}", None)
             has_lrp = any(
-                bool(top_explanations.get(str(day), {}).get(f"{prefix}_{col}"))
+                bool(top_explanations.get(str(day + 1), {}).get(f"{prefix}_{col}"))
                 for prefix in ("d1_1", "d1_2", "d1_3", "d2_1", "d2_2", "d2_3")
             )
 
@@ -111,6 +168,13 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
             slot_data[f"{col}_lrp"] = value if has_lrp else None
 
         return slot_data
+
+    def _blank_future_slot(self, slot_data: dict) -> dict:
+        axis_keys = (APIItems.DAY.value, APIItems.SLOT.value, APIItems.DATE.value)
+        return {
+            key: (value if key in axis_keys else None)
+            for key, value in slot_data.items()
+        }
 
     def _format_daily_data(
         self,
@@ -121,6 +185,7 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         **kwargs,
     ):
         data: dict = record.data
+        model_input_day = self._resolve_model_input_day(record)
 
         if callback is None:
             callback = self._default_daily_data_formatter
@@ -136,19 +201,24 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
                 slot_data = callback(
                     day, slot, columns, data, top_explanations, slot_data, **kwargs
                 )
+                if self._is_future(day + 1, model_input_day):
+                    slot_data = self._blank_future_slot(slot_data)
                 formatted.append(slot_data)
 
         return formatted
-    
+
     def _get_gt_symbol(self, value) -> str:
         if value in (1, 1.0, "1", True):
             return "+"
         return "-"
 
-    def _get_gt_list_by_slots(self, data: dict) -> str:
+    def _get_gt_list_by_slots(self, data: dict, max_gt_day: Optional[int]) -> str:
         aki_data = ""
         for day in range(N_DAYS):
             for slot in range(N_SLOTS):
+                if self._is_future(day + 1, max_gt_day):
+                    aki_data += " "
+                    continue
                 aki_datum = data.get(f"d{day + 1}_{slot + 1}_aki", None)
                 aki_data += self._get_gt_symbol(aki_datum)
         return aki_data
@@ -161,7 +231,7 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         data = record.data or {}
 
         general_data = {col: data.get(col, None) for col in GENERAL_DATA_COLUMNS}
-        aki_data = self._get_gt_list_by_slots(data)
+        aki_data = self._get_gt_list_by_slots(data, self._max_ground_truth_day(record))
 
         return {"aki": aki_data, **general_data}
 
@@ -193,9 +263,13 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         **kwargs,
     ):
         for col in columns:
-            value = data.get(f"d{day}_{slot}_{col}_avg", None)
+            value = data.get(f"d{day + 1}_{slot + 1}_{col}_avg", None)
             has_lrp = any(
-                bool(top_explanations.get(str(day), {}).get(f"{prefix}_{col}_{suffix}"))
+                bool(
+                    top_explanations.get(str(day + 1), {}).get(
+                        f"{prefix}_{col}_{suffix}"
+                    )
+                )
                 for prefix in ("d1_1", "d1_2", "d1_3", "d2_1", "d2_2", "d2_3")
                 for suffix in ("min", "max", "avg")
             )
@@ -232,6 +306,7 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         top_explanations: Dict[str, Dict[str, str]],
     ):
         data: dict = record.data
+        model_input_day = self._resolve_model_input_day(record)
 
         formatted = []
         lrp_test_columns = (*area_columns, column)
@@ -244,16 +319,24 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
                     APIItems.DATE.value: self._get_date(record.reference_date, day),
                 }
 
-                value = data.get(f"d{day}_{slot}_{column}", None)
+                if self._is_future(day + 1, model_input_day):
+                    slot_data[name] = None
+                    slot_data[f"{name}_area"] = [None for _ in area_columns]
+                    slot_data[f"{name}_lrp"] = None
+                    formatted.append(slot_data)
+                    continue
+
+                value = data.get(f"d{day + 1}_{slot + 1}_{column}", None)
                 has_lrp = any(
-                    bool(top_explanations.get(str(day), {}).get(f"{prefix}_{col}"))
+                    bool(top_explanations.get(str(day + 1), {}).get(f"{prefix}_{col}"))
                     for prefix in ("d1_1", "d1_2", "d1_3", "d2_1", "d2_2", "d2_3")
                     for col in lrp_test_columns
                 )
 
                 slot_data[name] = value
                 slot_data[f"{name}_area"] = [
-                    data.get(f"d{day}_{slot}_{col}", None) for col in area_columns
+                    data.get(f"d{day + 1}_{slot + 1}_{col}", None)
+                    for col in area_columns
                 ]
                 slot_data[f"{name}_lrp"] = value if has_lrp else None
 
@@ -285,13 +368,28 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
 
         data = record.data or {}
 
-        baseline_creatinine = data.get("b_cr", None)
+        model_input_day = self._resolve_model_input_day(record)
+        max_gt_day = self._max_ground_truth_day(record)
+
+        b_cr = data.get("b_cr", None)
+
+        raw_creatinine = [
+            None
+            if self._is_future((i // N_SLOTS) + 1, model_input_day)
+            else data.get(key, None)
+            for i, key in enumerate(CREATININE_COLUMNS)
+        ]
+
         creatinine_vals = [None]
-        for key in CREATININE_COLUMNS:
-            creatinine_vals.append(data.get(key, None) or creatinine_vals[-1])
+        for value in raw_creatinine:
+            creatinine_vals.append(value or creatinine_vals[-1])
         creatinine_vals = creatinine_vals[1:]
         for i in range(len(creatinine_vals) - 2, -1, -1):
             creatinine_vals[i] = creatinine_vals[i] or creatinine_vals[i + 1]
+
+        for i in range(len(creatinine_vals)):
+            if self._is_future((i // N_SLOTS) + 1, model_input_day):
+                creatinine_vals[i] = None
 
         n_entries = len(CREATININE_COLUMNS)
 
@@ -319,18 +417,35 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
                 if thresholds[i] is None and thresholds[i - 1] is not None:
                     thresholds[i] = thresholds[i - 1]
 
+            for i in range(n_entries):
+                if self._is_future((i // N_SLOTS) + 1, model_input_day):
+                    predictions[i] = None
+                    predictions_daily[i] = None
+                    thresholds[i] = None
+
+        def ground_truth(day: int, slot: int):
+            if self._is_future(day, max_gt_day):
+                return None
+            return self._get_gt_symbol(data.get(f"d{day}_{slot}_aki", None))
+
         return [
             {
-                APIItems.DATE.value: self._get_date(record.reference_date, i // 3),
-                APIItems.DAY.value: (i // 3) + 1,
-                APIItems.SLOT.value: (i % 3) + 1,
-                APIItems.BASELINE_CREATININE.value: baseline_creatinine,
+                APIItems.DATE.value: self._get_date(
+                    record.reference_date, i // N_SLOTS
+                ),
+                APIItems.DAY.value: (i // N_SLOTS) + 1,
+                APIItems.SLOT.value: (i % N_SLOTS) + 1,
+                APIItems.B_CR.value: (
+                    None
+                    if self._is_future((i // N_SLOTS) + 1, model_input_day)
+                    else b_cr
+                ),
                 APIItems.CREATININE.value: creatinine_vals[i],
                 APIItems.PROBABILITY.value: predictions[i],
                 APIItems.PROBABILITY_DAILY.value: predictions_daily[i],
                 APIItems.THRESHOLD.value: thresholds[i],
-                APIItems.GROUND_TRUTH.value: self._get_gt_symbol(
-                    data.get(f"d{(i // 3) + 1}_{(i % 3) + 1}_aki", None)
+                APIItems.GROUND_TRUTH.value: ground_truth(
+                    (i // N_SLOTS) + 1, (i % N_SLOTS) + 1
                 ),
             }
             for i in range(len(creatinine_vals))
@@ -347,9 +462,9 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
         **kwargs,
     ):
         for col in columns:
-            value = data.get(f"d{day}_{slot}_{col}", None)
+            value = data.get(f"d{day + 1}_{slot + 1}_{col}", None)
             has_lrp = any(
-                bool(top_explanations.get(str(day), {}).get(f"{prefix}_{col}"))
+                bool(top_explanations.get(str(day + 1), {}).get(f"{prefix}_{col}"))
                 for prefix in ("d1_1", "d1_2", "d1_3", "d2_1", "d2_2", "d2_3")
             )
 
@@ -416,12 +531,20 @@ class PatientMedicalRecordPredictionsSchema(ma.SQLAlchemyAutoSchema):
 
         data: dict = record.data
         columns = SURGERY_COLUMNS
+        model_input_day = self._resolve_model_input_day(record)
 
         return [
             {
                 APIItems.DAY.value: day + 1,
                 APIItems.DATE.value: self._get_date(record.reference_date, day),
-                **{column: data.get(f"d{day}_{column}", None) for column in columns},
+                **{
+                    column: (
+                        None
+                        if self._is_future(day + 1, model_input_day)
+                        else data.get(f"d{day + 1}_{column}", None)
+                    )
+                    for column in columns
+                },
             }
             for day in range(N_DAYS)
         ]

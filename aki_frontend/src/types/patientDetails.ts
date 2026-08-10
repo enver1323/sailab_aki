@@ -31,13 +31,23 @@ export type PatientBinaryDataEntry = {
 export type TimeSeriesEntry = {
   day: number;
   date: number;
-  creatine: number;
-  baseline_creatine: number | null;
+  creatinine: number | null;
+  b_cr: number | null;
   probability: number;
   threshold: number;
   probability_daily?: number | null;
-  ground_truth?: string;
+  ground_truth?: string | null;
   slot: number;
+};
+
+export type ModelWindow = {
+  model_input_day: number;
+  input_start_day: number;
+  input_end_day: number;
+  output_start_day: number | null;
+  output_end_day: number | null;
+  n_days: number;
+  n_slots: number;
 };
 
 export type PatientMetaData = {
@@ -85,6 +95,7 @@ export interface ITimeSeriesData {
     value: number;
     threshold: number;
   };
+  model_window: ModelWindow | null;
   general_data: PatientMetaData;
   binary_data: Array<PatientBinaryDataEntry>;
   test_data: Array<RangeEntry>;

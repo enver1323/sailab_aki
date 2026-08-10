@@ -1,4 +1,6 @@
 import {
+  Label,
+  ReferenceArea,
   Tooltip,
   XAxis,
   YAxis,
@@ -14,8 +16,10 @@ import {
   COLORS,
   getDayAxisKey,
   getTicksDomain,
+  getWindowBandIndexes,
+  WINDOW_COLORS,
 } from "@/components/utils/graphUtils";
-import { ITimeSeriesData } from "@/types/patientDetails";
+import { ITimeSeriesData, ModelWindow } from "@/types/patientDetails";
 import React from "react";
 import { getGraphEvaluator } from "@/utils/evaluation";
 import { GraphClickSyntheticEvent } from "@/types/evaluation";
@@ -86,7 +90,12 @@ type AntibioticTooltip = {
   y: number;
 } | null;
 
-const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }> = ({ data }) => {
+type PrescriptionGraphProps = {
+  data: ITimeSeriesData["prescription_data"];
+  modelWindow?: ModelWindow | null;
+};
+
+const PrescriptionGraph: React.FC<PrescriptionGraphProps> = ({ data, modelWindow }) => {
   const ROW_HEIGHT_PX = 46;
   const X_AXIS_HEIGHT_PX = 32;
   const CHART_MARGIN = { top: 8, right: 8, bottom: 8, left: 0 };
@@ -107,6 +116,8 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
   const xTicks = getTicksDomain(maxDay);
   const xTicksMapper = makeMapper(xTicks);
   const dayTickIndexes = Object.values(xTicksMapper).filter((index) => Number(index) % 3 === 0);
+
+  const windowBands = getWindowBandIndexes(modelWindow);
 
   const dataColumnsMapper = makeMapper(dataColumns);
   const filteredDataColumns = dataColumns.filter((col) => scatterData[col].length > 0)
@@ -227,6 +238,19 @@ const PrescriptionGraph: React.FC<{ data: ITimeSeriesData["prescription_data"] }
               return Number.isFinite(index) ? (xTicks[index] ?? "") : "";
             }}
           />
+          {windowBands.map(({ key, x1, x2, fill, label }) => (
+            <ReferenceArea
+              x1={x1}
+              x2={x2}
+              key={`window_${key}`}
+              fill={fill}
+              fillOpacity={0.55}
+            >
+              {label ? (
+                <Label value={label} position="center" fill={WINDOW_COLORS.futureText} fontSize={14} />
+              ) : null}
+            </ReferenceArea>
+          ))}
           {filteredDataColumns
             .map((col, id) => (
               <Scatter

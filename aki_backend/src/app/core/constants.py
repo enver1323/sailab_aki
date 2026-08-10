@@ -21,7 +21,7 @@ class APIItems(Enum):
     DATE = "date"
     SLOT = "slot"
     CREATININE = "creatinine"
-    BASELINE_CREATININE = "baseline_creatinine"
+    B_CR = "b_cr"
     PROBABILITY = "probability"
     PROBABILITY_CRITICAL = "probability_critical"
     PROBABILITY_DAILY = "probability_daily"
@@ -55,3 +55,12 @@ class APIItems(Enum):
 
     PRE6M = "pre6m"
     DAILY = "daily"
+
+    MODEL_WINDOW = "model_window"
+    MODEL_INPUT_DAY = "model_input_day"
+    INPUT_START_DAY = "input_start_day"
+    INPUT_END_DAY = "input_end_day"
+    OUTPUT_START_DAY = "output_start_day"
+    OUTPUT_END_DAY = "output_end_day"
+    N_DAYS = "n_days"
+    N_SLOTS = "n_slots"
